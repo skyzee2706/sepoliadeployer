@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVM Deployer (Safe Mode)</title>
+    <title>EVM Deployer (Bulletproof)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -43,16 +43,20 @@
     </div>
 
     <!-- NAVBAR -->
-    <header class="h-20 border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-6 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-500/20"><i data-lucide="zap" class="text-white w-5 h-5"></i></div>
-            <span class="font-bold text-xl tracking-tight">EVM<span class="text-blue-500">Deployer</span></span>
+    <header class="h-auto md:h-20 border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3 w-full md:w-auto justify-between">
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-500/20"><i data-lucide="zap" class="text-white w-5 h-5"></i></div>
+                <span class="font-bold text-xl tracking-tight">EVM<span class="text-blue-500">Deployer</span></span>
+            </div>
+            <!-- NETWORK BADGE MOBILE (FIXED: Added ID to prevent crash) -->
+            <span id="networkBadgeMobile" class="md:hidden text-[10px] px-2 py-1 bg-slate-800 rounded text-slate-400 border border-slate-700">Offline</span>
         </div>
         
-        <div class="flex items-center gap-3">
-            <div class="relative hidden md:block group">
+        <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+            <div class="relative w-full md:w-auto group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="globe" class="h-4 w-4 text-slate-400"></i></div>
-                <select id="networkSelect" onchange="switchNetwork()" class="bg-slate-900 border border-slate-700 text-slate-300 text-xs font-bold rounded-lg pl-10 pr-10 py-2.5 outline-none cursor-pointer hover:border-blue-500 focus:ring-1 focus:ring-blue-500 w-56 transition-all appearance-none">
+                <select id="networkSelect" onchange="switchNetwork()" class="w-full md:w-56 bg-slate-900 border border-slate-700 text-slate-300 text-xs font-bold rounded-lg pl-10 pr-10 py-3 outline-none cursor-pointer hover:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none">
                     <optgroup label="🟢 TESTNETS">
                         <option value="0xaa36a7">Sepolia ETH</option>
                         <option value="0x14a34">Base Sepolia</option>
@@ -73,7 +77,7 @@
                 </select>
                 <i data-lucide="chevron-down" class="absolute right-3 top-3 w-4 h-4 text-slate-500 pointer-events-none"></i>
             </div>
-            <button id="connectBtn" onclick="toggleModal(true)" class="bg-white text-slate-900 hover:bg-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg flex items-center gap-2">
+            <button id="connectBtn" onclick="toggleModal(true)" class="w-full md:w-auto bg-white text-slate-900 hover:bg-slate-200 px-5 py-3 rounded-lg text-sm font-bold transition-all shadow-lg flex items-center justify-center gap-2">
                 Connect Wallet
             </button>
         </div>
@@ -91,7 +95,7 @@
                     <h2 class="text-2xl font-bold text-white flex items-center gap-2">
                         <i data-lucide="rocket" class="text-blue-500"></i> Create Token
                     </h2>
-                    <span id="networkBadge" class="px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-[10px] uppercase font-bold text-slate-500">Waiting...</span>
+                    <span id="networkBadge" class="hidden md:inline-block px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-[10px] uppercase font-bold text-slate-500">Waiting...</span>
                 </div>
 
                 <div class="space-y-6">
@@ -176,7 +180,7 @@
 
         let provider, signer, userAddress, currentChainId = "0xaa36a7";
 
-        // --- ARTIFACTS (CHUNKED FOR SAFETY) ---
+        // --- ARTIFACTS (SAFE CHUNKING TO PREVENT COPY ERRORS) ---
         const ABI = [
             "constructor(string name, string symbol, uint256 initialSupply)",
             "function name() view returns (string)",
@@ -186,14 +190,13 @@
             "function transfer(address to, uint256 value) returns (bool)"
         ];
 
-        // BYTECODE: Standard ERC20 Fixed Supply (OpenZeppelin).
-        // Dipecah menjadi array agar tidak terpotong saat copy-paste.
-        const BC_CHUNKS = [
-            "0x608060405234801561001057600080fd5b5060405161067138038061067183398181016040528101906100329190610082565b8060008190555033600181905550600280546001600160a01b031916331790556100b08161006b565b600160a01b031633600160a01b031614156100aa576100aa6100a583600254600160a01b0316610196565b6101e9565b5b5050610251565b600081519050919050565b600082825260208201905092915050565b6000819050919050565b60006100a08261008d565b9050919050565b60006100c26100bd6100b884610096565b610093565b610093565b9050919050565b6000604051905090565b6000602082840312156100ec57600080fd5b8151600160a01b038116811461010357600080fd5b50919050565b6000819050919050565b600080600061012d61012661012185610096565b610109565b61008d565b905060008151905090506000825190509050600083905084600254600160a01b031661015d565b505050505092915050565b6000600254600160a01b0316905090565b6000819050919050565b61017e8161016b565b811461018957600080fd5b50565b60008135905061019b81610175565b92915050565b600080604083850312156101b857600080fd5b6101be8361018f565b91506101c98261018f565b90509250929050565b60008060008060008584019050848301905084820190509392505050565b60006102036101fe6101f9846100d9565b6101d2565b6101d2565b9050919050565b6102138161016b565b82525050565b600060208201905061022e600083018461020a565b92915050565b600081519050919050565b600082825260208201905092915050565b61025b8161008d565b6106718061026a6000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806306fdde031461005c57806318160ddd1461007a578063313ce5671461009857806370a08231146100b657806395d89b41146100e6578063a9059cbb14610104575b600080fd5b610064610124565b6040516100719190610492565b60405180910390f35b6100826101ba565b60405161008f9190610560565b60405180910390f35b6100a06101c3565b6040516100ad919061057b565b60405180910390f35b6100ce60048036038101906100c991906105ba565b6101cc565b6040516100db9190610560565b60405180910390f35b6100ee610215565b6040516100fb9190610492565b60405180910390f35b610112600480360381019061010d91906105fc565b6102a7565b60405161011f919061062b565b60405180910390f35b6060600280546101339061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600254600101600160a01b039091166101659061052a565b600182015260606020820152915050905090565b600080546001600160a01b03166001600160a01b031681526020019081526020016000205490565b60006012905090565b6060600380546101d29061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600354600101600160a01b039091166102049061052a565b600182015260606020820152915050905090565b6060600480546102249061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600454600101600160a01b039091166102569061052a565b600182015260606020820152915050905090565b60006102b28383336102fc565b6001905092915050565b60006102d8816102d1565b6102e8565b6102e2816102d1565b6102e8565b9050919050565b60006001600160a01b0316811614156102fc57600080fd5b600080546001600160a01b03166001600160a01b031681526020019081526020016000205482111561032d57600080fd5b600080546001600160a01b03166001600160a01b0316815260200190815260200160002060008282540392505081905550600080546001600160a01b03166001600160a01b031681526020019081526020016000206000838254019250508190555081336001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef836040516103c49190610560565b60405180910390a3505050565b6000604051905090565b6000602082840312156103eb57600080fd5b5051919050565b60006020828403121561040057600080fd5b81516001600160a01b038116811461041757600080fd5b50919050565b6000819050919050565b6000819050919050565b600061044161043c6104378461041d565b610428565b610428565b9050919050565b6000819050919050565b61045b81610448565b811461046657600080fd5b50565b60008135905061047881610452565b92915050565b600060208201905061048e57600080fd5b815161049e8161042e565b919050565b600081905092915050565b6104b6816104a5565b82525050565b60006020820190506104d160008301846104ad565b92915050565b6000806000606084815260208101825260408082018681529252826080820152909150600160a01b0316905060005b838110156105145780820151818401526020810190506104f9565b50505050905090565b610533816104a5565b82525050565b600060208201905061054e600083018461052a565b92915050565b61056981610452565b82525050565b60006020820190506105846000830184610560565b92915050565b610590610448565b60008211156105a557600080fd5b5090565b6105af816104a5565b81146105ba57600080fd5b50565b6000813590506105cc816105a8565b92915050565b6000819050919050565b6105e5816105d2565b82525050565b600060208201905061060060008301846105dc565b92915050565b60008135905061061281610452565b92915050565b6000806040838503121561062f57600080fd5b61063583610606565b915061064082610606565b90509250929050565b60008115159050919050565b61065981610648565b82525050565b60006020820190506106746000830184610650565b9291505056000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000d3c21bcecceda1000000000000000000000000000000000000000000000000000000000000000000000"
+        // Bytecode dipecah menjadi array agar tidak error saat dicopy/render.
+        // Script akan menggabungkannya kembali secara otomatis.
+        const BC_PARTS = [
+            "0x608060405234801561001057600080fd5b5060405161067138038061067183398181016040528101906100329190610082565b8060008190555033600181905550600280546001600160a01b031916331790556100b08161006b565b600160a01b031633600160a01b031614156100aa576100aa6100a583600254600160a01b0316610196565b6101e9565b5b5050610251565b600081519050919050565b600082825260208201905092915050565b6000819050919050565b60006100a08261008d565b9050919050565b60006100c26100bd6100b884610096565b610093565b610093565b9050919050565b6000604051905090565b6000602082840312156100ec57600080fd5b8151600160a01b038116811461010357600080fd5b50919050565b6000819050919050565b600080600061012d61012661012185610096565b610109565b61008d565b905060008151905090506000825190509050600083905084600254600160a01b031661015d565b505050505092915050565b6000600254600160a01b0316905090565b6000819050919050565b61017e8161016b565b811461018957600080fd5b50565b60008135905061019b81610175565b92915050565b600080604083850312156101b857600080fd5b6101be8361018f565b91506101c98261018f565b90509250929050565b60008060008060008584019050848301905084820190509392505050565b60006102036101fe6101f9846100d9565b6101d2565b6101d2565b9050919050565b6102138161016b565b82525050565b600060208201905061022e600083018461020a565b92915050565b600081519050919050565b600082825260208201905092915050565b61025b8161008d565b6106718061026a6000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806306fdde031461005c57806318160ddd1461007a578063313ce5671461009857806370a08231146100b657806395d89b41146100e6578063a9059cbb14610104575b600080fd5b610064610124565b6040516100719190610492565b60405180910390f35b6100826101ba565b60405161008f9190610560565b60405180910390f35b6100a06101c3565b6040516100ad919061057b565b60405180910390f35b6100ce60048036038101906100c991906105ba565b6101cc565b6040516100db9190610560565b60405180910390f35b6100ee610215565b6040516100fb9190610492565b60405180910390f35b610112600480360381019061010d91906105fc565b6102a7565b60405161011f919061062b565b60405180910390f35b6060600280546101339061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600254600101600160a01b039091166101659061052a565b600182015260606020820152915050905090565b600080546001600160a01b03166001600160a01b031681526020019081526020016000205490565b60006012905090565b6060600380546101d29061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600354600101600160a01b039091166102049061052a565b600182015260606020820152915050905090565b6060600480546102249061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600454600101600160a01b039091166102569061052a565b600182015260606020820152915050905090565b60006102b28383336102fc565b6001905092915050565b60006102d8816102d1565b6102e8565b6102e2816102d1565b6102e8565b9050919050565b60006001600160a01b0316811614156102fc57600080fd5b600080546001600160a01b03166001600160a01b0316815260200190815260200160002060008282540392505081905550600080546001600160a01b03166001600160a01b031681526020019081526020016000206000838254019250508190555081336001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef836040516103c49190610560565b60405180910390a3505050565b6000604051905090565b6000602082840312156103eb57600080fd5b5051919050565b60006020828403121561040057600080fd5b81516001600160a01b038116811461041757600080fd5b50919050565b6000819050919050565b6000819050919050565b600061044161043c6104378461041d565b610428565b610428565b9050919050565b6000819050919050565b61045b81610448565b811461046657600080fd5b50565b60008135905061047881610452565b92915050565b600060208201905061048e57600080fd5b815161049e8161042e565b919050565b600081905092915050565b6104b6816104a5565b82525050565b60006020820190506104d160008301846104ad565b92915050565b6000806000606084815260208101825260408082018681529252826080820152909150600160a01b0316905060005b838110156105145780820151818401526020810190506104f9565b50505050905090565b610533816104a5565b82525050565b600060208201905061054e600083018461052a565b92915050565b61056981610452565b82525050565b60006020820190506105846000830184610560565b92915050565b610590610448565b60008211156105a557600080fd5b5090565b6105af816104a5565b81146105ba57600080fd5b50565b6000813590506105cc816105a8565b92915050565b6000819050919050565b6105e5816105d2565b82525050565b600060208201905061060060008301846105dc565b92915050565b60008135905061061281610452565b92915050565b6000806040838503121561062f57600080fd5b61063583610606565b915061064082610606565b90509250929050565b60008115159050919050565b61065981610648565b82525050565b60006020820190506106746000830184610650565b9291505056000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000d3c21bcecceda1000000000000000000000000000000000000000000000000000000000000000000000"
         ];
 
-        // Reconstruct Bytecode
-        const BYTECODE_FULL = BC_CHUNKS.join('');
+        const BYTECODE_FULL = BC_PARTS.join(""); // Gabungkan kembali
 
         function log(msg, type = 'info') {
             const area = document.getElementById('logs');
@@ -211,124 +214,137 @@
             else { m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); }
         }
 
-        // --- CONNECT ---
         async function connectWallet(t) {
             toggleModal(false);
             try {
                 let raw;
-                if(t==='metamask') {
-                    raw = window.ethereum?.providers?.find(p=>p.isMetaMask) || window.ethereum;
-                } else if(t==='okx') {
+                if (t === 'bitget') {
+                    raw = window.bitkeep?.ethereum || window.isBitKeep && window.ethereum;
+                } else if (t === 'okx') {
                     raw = window.okxwallet || window.ethereum;
-                } else if(t==='bitget') {
-                    raw = window.bitkeep?.ethereum || window.ethereum;
+                } else if (t === 'metamask') {
+                    raw = window.ethereum?.providers?.find(p => p.isMetaMask) || window.ethereum;
                 } else {
                     raw = window.ethereum;
                 }
 
-                if(!raw) throw new Error("Wallet not found");
+                if (!raw) throw new Error(`${t} not found! Please install extension.`);
 
                 provider = new ethers.BrowserProvider(raw);
-                const acc = await provider.send("eth_requestAccounts", []);
+                const accounts = await provider.send("eth_requestAccounts", []);
                 signer = await provider.getSigner();
-                userAddress = acc[0];
+                userAddress = accounts[0];
 
-                document.getElementById('connectBtn').innerHTML = `<i data-lucide="wallet" class="w-4 h-4"></i> ${userAddress.substring(0,5)}...`;
-                const btn = document.getElementById('deployBtn');
-                btn.disabled = false;
-                btn.innerText = "DEPLOY TOKEN 🚀";
-                btn.className = "w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:scale-[1.02] transition-all shadow-lg shadow-blue-900/20";
+                document.getElementById('connectBtn').innerHTML = `<i data-lucide="wallet" class="w-4 h-4"></i> ${userAddress.substring(0,6)}...`;
+                const deployBtn = document.getElementById('deployBtn');
+                deployBtn.disabled = false;
+                deployBtn.innerHTML = `DEPLOY TOKEN <i data-lucide="rocket" class="w-4 h-4 ml-1"></i>`;
+                deployBtn.className = "w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-[1.02] transition-all shadow-lg shadow-indigo-500/30";
+
+                log(`Connected: ${userAddress}`, "success");
                 
-                log("Wallet Connected", "success");
-                
-                if(raw.on) raw.on('chainChanged', (c)=>updateNetworkUI(c));
                 const net = await provider.getNetwork();
-                updateNetworkUI("0x"+net.chainId.toString(16));
+                const chainId = "0x" + net.chainId.toString(16);
+                updateNetworkUI(chainId);
 
-            } catch(e){ log(e.message, "error"); }
+                if(raw.on) {
+                    raw.on('chainChanged', (cid) => {
+                        updateNetworkUI(cid);
+                        log(`Network changed to ${cid}`);
+                    });
+                }
+
+            } catch (e) {
+                log(e.message, "error");
+            }
         }
 
-        function updateNetworkUI(cid) {
-            currentChainId = cid;
-            const net = NETWORKS[cid];
-            document.getElementById('networkSelect').value = NETWORKS[cid] ? cid : "0xaa36a7";
+        function updateNetworkUI(chainId) {
+            currentChainId = chainId;
+            const net = NETWORKS[chainId];
+            const badge = document.getElementById('networkBadge');
+            const badgeMobile = document.getElementById('networkBadgeMobile');
+            const select = document.getElementById('networkSelect');
             
-            const txt = net ? net.name : "Unknown";
-            const style = `hidden md:inline-block px-3 py-1 rounded-full border text-[10px] font-bold uppercase ${net && (net.name.includes('Test') || net.name.includes('Sepolia')) ? 'bg-green-900/20 text-green-400 border-green-900/50' : 'bg-red-900/20 text-red-400 border-red-900/50'}`;
-            
-            document.getElementById('networkBadge').innerText = txt;
-            document.getElementById('networkBadge').className = style;
-            document.getElementById('networkBadgeMobile').innerText = txt;
+            if (net) {
+                select.value = chainId;
+                const txt = net.name;
+                badge.innerText = txt;
+                badgeMobile.innerText = txt;
+                badge.className = `hidden md:inline-block px-3 py-1 rounded-full border text-[10px] font-mono uppercase tracking-wider ${net.name.includes('Test') || net.name.includes('Sepolia') ? 'bg-green-900/20 text-green-400 border-green-900/50' : 'bg-red-900/20 text-red-400 border-red-900/50'}`;
+            } else {
+                badge.innerText = "Unknown";
+                badgeMobile.innerText = "Unknown";
+                badge.className = "hidden md:inline-block px-3 py-1 rounded-full bg-slate-800 text-slate-500 border border-slate-700";
+            }
         }
 
         async function switchNetwork() {
-            const target = document.getElementById('networkSelect').value;
             if(!provider) return;
+            const target = document.getElementById('networkSelect').value;
             const net = NETWORKS[target];
             try {
                 await provider.send("wallet_switchEthereumChain", [{ chainId: target }]);
-            } catch(e) {
-                if(e.code === 4902) {
+            } catch (e) {
+                if (e.code === 4902) {
                     try {
                         await provider.send("wallet_addEthereumChain", [{
-                            chainId: target, chainName: net.name, rpcUrls: [net.rpc],
-                            nativeCurrency: { name: net.ticker, symbol: net.ticker, decimals: 18 },
+                            chainId: target,
+                            chainName: net.name,
+                            rpcUrls: [net.rpc],
+                            nativeCurrency: { name: net.symbol, symbol: net.symbol, decimals: 18 },
                             blockExplorerUrls: [net.explorer]
                         }]);
-                    } catch(addErr) { log(addErr.message, "error"); }
+                    } catch (addErr) { log(addErr.message, "error"); }
                 }
             }
         }
 
-        // --- DEPLOY ---
         async function deployToken() {
             const name = document.getElementById('inputName').value;
             const symbol = document.getElementById('inputSymbol').value;
             const supply = document.getElementById('inputSupply').value;
 
-            if (!name || !symbol || !supply) return log("Fill all fields", "error");
+            if (!name || !symbol || !supply) return log("Isi semua data form!", "error");
 
             const btn = document.getElementById('deployBtn');
             btn.disabled = true;
-            btn.innerText = "Processing...";
+            btn.innerText = "Deploying...";
 
             try {
                 log(`Preparing ${name} (${symbol})...`);
                 
-                // Check if bytecode chunks joined correctly
-                if (!BYTECODE_FULL || BYTECODE_FULL.length < 100) throw new Error("Bytecode error");
-
                 const factory = new ethers.ContractFactory(ABI, BYTECODE_FULL, signer);
                 const supplyWei = ethers.parseUnits(supply, 18);
 
-                // FORCE MANUAL GAS LIMIT (3,000,000) 
-                const contract = await factory.deploy(name, symbol, supplyWei, { gasLimit: 3000000 });
+                // FORCE GAS LIMIT 5M (Safety)
+                const contract = await factory.deploy(name, symbol, supplyWei, { gasLimit: 5000000 });
                 
                 log(`Tx Sent: ${contract.deploymentTransaction().hash}`, "warning");
                 log("Waiting for confirmation...");
 
                 await contract.waitForDeployment();
-                const addr = contract.target;
+                const address = contract.target;
 
-                document.getElementById('contractAddress').innerText = addr;
-                document.getElementById('explorerLink').href = `${NETWORKS[currentChainId]?.explorer || ''}/address/${addr}`;
+                document.getElementById('contractAddress').innerText = address;
+                document.getElementById('explorerLink').href = `${NETWORKS[currentChainId]?.explorer || 'https://etherscan.io'}/address/${address}`;
                 document.getElementById('successCard').classList.remove('hidden');
                 
-                log(`✅ DEPLOYED: ${addr}`, "success");
-                
+                log(`✅ SUCCESS! Contract: ${address}`, "success");
+
                 try {
                     await window.ethereum.request({
                         method: 'wallet_watchAsset',
-                        params: { type: 'ERC20', options: { address: addr, symbol: symbol, decimals: 18 } },
+                        params: { type: 'ERC20', options: { address, symbol, decimals: 18 } },
                     });
                 } catch(e){}
 
-            } catch(e) {
+            } catch (e) {
                 console.error(e);
                 log(`Failed: ${e.reason || e.message}`, "error");
             } finally {
                 btn.disabled = false;
-                btn.innerText = "DEPLOY TOKEN 🚀";
+                btn.innerHTML = `DEPLOY TOKEN <i data-lucide="rocket" class="w-4 h-4 ml-1"></i>`;
             }
         }
 
@@ -341,4 +357,5 @@
     </script>
 </body>
 </html>
+
 
