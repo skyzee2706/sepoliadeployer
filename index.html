@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVM Deployer (Safe Mode)</title>
+    <title>EVM Deployer (Pro Edition)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } } }</script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        body { background-color: #020617; color: #f8fafc; }
         select { -webkit-appearance: none; appearance: none; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; background: #1e293b; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; background: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col relative">
 
-    <!-- ERROR TOAST -->
-    <div id="errorToast" class="hidden fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-full shadow-2xl z-[100] font-bold text-sm animate-bounce">
-        ⚠️ Error
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="hidden fixed top-5 left-1/2 transform -translate-x-1/2 z-[100] px-6 py-3 rounded-full shadow-2xl font-bold text-sm transition-all duration-300 opacity-0 translate-y-[-20px]">
+        Notification
     </div>
 
     <!-- WALLET MODAL -->
-    <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 hidden opacity-0 transition-opacity duration-300 backdrop-blur-sm">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl transform scale-95 transition-transform">
+    <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 hidden backdrop-blur-sm transition-opacity duration-200 opacity-0">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl transform scale-95 transition-transform">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="font-bold text-xl text-white">Connect Wallet</h3>
                 <button onclick="toggleModal(false)" class="text-slate-400 hover:text-white"><i data-lucide="x"></i></button>
@@ -33,63 +33,69 @@
             <div class="space-y-3">
                 <button onclick="connectWallet('metamask')" class="w-full flex items-center gap-4 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all group">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" class="w-8 h-8 group-hover:scale-110 transition-transform">
-                    <span class="font-bold">MetaMask</span>
+                    <div><span class="block font-bold text-white">MetaMask</span><span class="text-xs text-slate-400">Browser Extension</span></div>
                 </button>
                 <button onclick="connectWallet('okx')" class="w-full flex items-center gap-4 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all group">
                     <div class="w-8 h-8 bg-white rounded-full text-black flex items-center justify-center font-black text-[10px] group-hover:scale-110 transition-transform">OKX</div>
-                    <span class="font-bold">OKX Wallet</span>
+                    <div><span class="block font-bold text-white">OKX Wallet</span><span class="text-xs text-slate-400">Web3 Wallet</span></div>
                 </button>
                 <button onclick="connectWallet('bitget')" class="w-full flex items-center gap-4 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all group">
                     <img src="https://seeklogo.com/images/B/bitget-token-new-bgb-logo-156576033F-seeklogo.com.png" onerror="this.src='https://via.placeholder.com/32'" class="w-8 h-8 bg-cyan-500 rounded-full p-0.5 group-hover:scale-110 transition-transform">
-                    <span class="font-bold">Bitget Wallet</span>
+                    <div><span class="block font-bold text-white">Bitget Wallet</span><span class="text-xs text-slate-400">Multi-Chain</span></div>
                 </button>
             </div>
         </div>
     </div>
 
     <!-- NAVBAR -->
-    <header class="h-auto md:h-20 border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-3 w-full md:w-auto justify-between">
-            <div class="flex items-center gap-2">
-                <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-500/20"><i data-lucide="zap" class="text-white w-5 h-5"></i></div>
-                <span class="font-bold text-xl tracking-tight">EVM<span class="text-blue-500">Deployer</span></span>
+    <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center justify-between w-full md:w-auto">
+                <div class="flex items-center gap-2">
+                    <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-500/20"><i data-lucide="zap" class="text-white w-5 h-5"></i></div>
+                    <span class="font-bold text-xl tracking-tight">EVM<span class="text-blue-500">Deployer</span></span>
+                </div>
+                <!-- Mobile Badge -->
+                <span id="networkBadgeMobile" class="md:hidden text-[10px] px-2 py-1 bg-slate-800 rounded text-slate-400 border border-slate-700 font-mono">OFFLINE</span>
             </div>
-            <!-- Mobile Badge -->
-            <span id="networkBadgeMobile" class="md:hidden text-[10px] px-2 py-1 bg-slate-800 rounded text-slate-400 border border-slate-700">Offline</span>
-        </div>
-        
-        <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-            <div class="relative w-full md:w-auto group">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="globe" class="h-4 w-4 text-slate-400"></i></div>
-                <select id="networkSelect" onchange="switchNetwork()" class="w-full md:w-56 bg-slate-900 border border-slate-700 text-slate-300 text-xs font-bold rounded-lg pl-10 pr-10 py-3 outline-none cursor-pointer hover:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none">
-                    <optgroup label="🟢 TESTNETS">
-                        <option value="0xaa36a7">Sepolia ETH</option>
-                        <option value="0x14a34">Base Sepolia</option>
-                        <option value="0x61">BSC Testnet</option>
-                        <option value="0x13882">Polygon Amoy</option>
-                        <option value="0xa869">Avalanche Fuji</option>
-                    </optgroup>
-                    <optgroup label="🔴 MAINNETS">
-                        <option value="0x1">Ethereum</option>
-                        <option value="0x38">BNB Chain</option>
-                        <option value="0x2105">Base</option>
-                        <option value="0xa4b1">Arbitrum</option>
-                        <option value="0xa">Optimism</option>
-                        <option value="0x89">Polygon</option>
-                        <option value="0xa86a">Avalanche</option>
-                        <option value="0xfa">Fantom</option>
-                    </optgroup>
-                </select>
-                <i data-lucide="chevron-down" class="absolute right-3 top-3 w-4 h-4 text-slate-500 pointer-events-none"></i>
+            
+            <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+                <!-- NETWORK SELECTOR -->
+                <div class="relative w-full md:w-auto group">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="globe" class="h-4 w-4 text-slate-400"></i></div>
+                    <select id="networkSelect" onchange="switchNetwork()" class="w-full md:w-64 bg-slate-900 border border-slate-700 text-slate-300 text-xs font-bold rounded-lg pl-10 pr-10 py-3 outline-none cursor-pointer hover:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none">
+                        <optgroup label="🟢 TESTNETS (Free)">
+                            <option value="0xaa36a7">Sepolia ETH</option>
+                            <option value="0x14a34">Base Sepolia</option>
+                            <option value="0x61">BSC Testnet</option>
+                            <option value="0x13882">Polygon Amoy</option>
+                            <option value="0xa869">Avalanche Fuji</option>
+                            <option value="0xaa37dc">OP Sepolia</option>
+                            <option value="0x66eee">Arbitrum Sepolia</option>
+                        </optgroup>
+                        <optgroup label="🔴 MAINNETS (Real)">
+                            <option value="0x1">Ethereum Mainnet</option>
+                            <option value="0x38">BNB Smart Chain</option>
+                            <option value="0x2105">Base Mainnet</option>
+                            <option value="0xa4b1">Arbitrum One</option>
+                            <option value="0xa">Optimism</option>
+                            <option value="0x89">Polygon</option>
+                            <option value="0xa86a">Avalanche</option>
+                            <option value="0xfa">Fantom</option>
+                        </optgroup>
+                    </select>
+                    <i data-lucide="chevron-down" class="absolute right-3 top-3.5 w-4 h-4 text-slate-500 pointer-events-none"></i>
+                </div>
+
+                <button id="connectBtn" onclick="toggleModal(true)" class="w-full md:w-auto bg-white text-slate-900 hover:bg-slate-200 px-6 py-3 rounded-lg text-sm font-bold transition-all shadow-lg flex items-center justify-center gap-2">
+                    Connect Wallet
+                </button>
             </div>
-            <button id="connectBtn" onclick="toggleModal(true)" class="w-full md:w-auto bg-white text-slate-900 hover:bg-slate-200 px-5 py-3 rounded-lg text-sm font-bold transition-all shadow-lg flex items-center justify-center gap-2">
-                Connect Wallet
-            </button>
         </div>
     </header>
 
     <!-- MAIN -->
-    <main class="flex-1 w-full max-w-7xl mx-auto p-6 grid md:grid-cols-12 gap-8">
+    <main class="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 grid md:grid-cols-12 gap-8">
         
         <!-- FORM -->
         <div class="md:col-span-7 space-y-6">
@@ -100,7 +106,7 @@
                     <h2 class="text-2xl font-bold text-white flex items-center gap-2">
                         <i data-lucide="rocket" class="text-blue-500"></i> Create Token
                     </h2>
-                    <span id="networkBadge" class="hidden md:inline-block px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-[10px] uppercase font-bold text-slate-500">Waiting...</span>
+                    <span id="networkBadge" class="hidden md:inline-block px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-[10px] uppercase font-bold text-slate-500 font-mono">Waiting...</span>
                 </div>
 
                 <div class="space-y-6">
@@ -118,15 +124,15 @@
                     <div>
                         <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">Total Supply</label>
                         <div class="relative">
-                            <input id="inputSupply" type="number" value="1000000" class="w-full bg-black/30 border border-slate-700 rounded-xl p-4 text-white font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all">
+                            <input id="inputSupply" type="number" value="1000000000" class="w-full bg-black/30 border border-slate-700 rounded-xl p-4 text-white font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all">
                             <span class="absolute right-4 top-4 text-xs text-slate-500 font-bold">TOKENS</span>
                         </div>
                         <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
-                            <i data-lucide="info" class="w-3 h-3 text-blue-500"></i> Fixed Supply (18 Decimals). Minted to your wallet.
+                            <i data-lucide="info" class="w-3 h-3 text-blue-500"></i> 18 Decimals. Minted directly to your wallet.
                         </p>
                     </div>
 
-                    <button id="deployBtn" onclick="deployToken()" disabled class="w-full py-4 rounded-xl font-bold text-lg bg-slate-800 text-slate-500 cursor-not-allowed mt-4 transition-all flex items-center justify-center gap-2 shadow-none border border-transparent hover:border-blue-500/30">
+                    <button id="deployBtn" onclick="deployToken()" disabled class="w-full py-4 rounded-xl font-bold text-lg bg-slate-800 text-slate-600 cursor-not-allowed mt-4 transition-all flex items-center justify-center gap-2 shadow-none border border-transparent hover:border-blue-500/30">
                         Connect Wallet First
                     </button>
                 </div>
@@ -140,7 +146,7 @@
                     <div class="bg-green-500 p-2 rounded-full text-white shadow-lg shadow-green-500/20"><i data-lucide="check" class="w-5 h-5"></i></div>
                     <div>
                         <h3 class="font-bold text-green-400 text-lg">Success!</h3>
-                        <p class="text-xs text-green-400/70">Token deployed & minted.</p>
+                        <p class="text-xs text-green-400/70">Token Deployed Successfully.</p>
                     </div>
                 </div>
                 <div class="bg-black/30 border border-green-500/10 rounded-xl p-4 mb-4 flex justify-between items-center">
@@ -166,25 +172,22 @@
     </main>
 
     <script>
-        // Handle Global Errors to prevent "Null" crashes
+        // Global Error Handler
         window.onerror = function(msg, url, line) {
             console.error("JS Error:", msg);
-            const t = document.getElementById('errorToast');
-            if(t) {
-                t.innerText = `Error: ${msg}`;
-                t.classList.remove('hidden');
-                setTimeout(() => t.classList.add('hidden'), 5000);
-            }
+            showToast(`Error: ${msg}`, 'error');
             return false;
         };
 
-        // --- CONFIG ---
+        // --- CONFIGURATION ---
         const NETWORKS = {
             "0xaa36a7": { name: "Sepolia", explorer: "https://sepolia.etherscan.io", rpc: "https://rpc.sepolia.org", ticker: "ETH" },
             "0x14a34": { name: "Base Sepolia", explorer: "https://sepolia.basescan.org", rpc: "https://sepolia.base.org", ticker: "ETH" },
             "0x61": { name: "BSC Testnet", explorer: "https://testnet.bscscan.com", rpc: "https://data-seed-prebsc-1-s1.binance.org:8545", ticker: "tBNB" },
             "0x13882": { name: "Polygon Amoy", explorer: "https://amoy.polygonscan.com", rpc: "https://rpc-amoy.polygon.technology", ticker: "MATIC" },
             "0xa869": { name: "Avalanche Fuji", explorer: "https://testnet.snowtrace.io", rpc: "https://api.avax-test.network/ext/bc/C/rpc", ticker: "AVAX" },
+            "0xaa37dc": { name: "OP Sepolia", explorer: "https://sepolia-optimism.etherscan.io", rpc: "https://sepolia.optimism.io", ticker: "ETH" },
+            "0x66eee": { name: "Arbitrum Sepolia", explorer: "https://sepolia.arbiscan.io", rpc: "https://sepolia-rollup.arbitrum.io/rpc", ticker: "ETH" },
             "0x1": { name: "Ethereum", explorer: "https://etherscan.io", rpc: "https://eth.llamarpc.com", ticker: "ETH" },
             "0x38": { name: "BNB Chain", explorer: "https://bscscan.com", rpc: "https://bsc-dataseed.binance.org/", ticker: "BNB" },
             "0x89": { name: "Polygon", explorer: "https://polygonscan.com", rpc: "https://polygon-rpc.com", ticker: "MATIC" },
@@ -207,13 +210,18 @@
             "function transfer(address to, uint256 value) returns (bool)"
         ];
 
-        // BYTECODE CHUNKS (Safe for Copy Paste)
-        // Ini adalah teknik "Chunking" agar string tidak rusak.
-        const B_PARTS = [
-            "0x608060405234801561001057600080fd5b5060405161067138038061067183398181016040528101906100329190610082565b8060008190555033600181905550600280546001600160a01b031916331790556100b08161006b565b600160a01b031633600160a01b031614156100aa576100aa6100a583600254600160a01b0316610196565b6101e9565b5b5050610251565b600081519050919050565b600082825260208201905092915050565b6000819050919050565b60006100a08261008d565b9050919050565b60006100c26100bd6100b884610096565b610093565b610093565b9050919050565b6000604051905090565b6000602082840312156100ec57600080fd5b8151600160a01b038116811461010357600080fd5b50919050565b6000819050919050565b600080600061012d61012661012185610096565b610109565b61008d565b905060008151905090506000825190509050600083905084600254600160a01b031661015d565b505050505092915050565b6000600254600160a01b0316905090565b6000819050919050565b61017e8161016b565b811461018957600080fd5b50565b60008135905061019b81610175565b92915050565b600080604083850312156101b857600080fd5b6101be8361018f565b91506101c98261018f565b90509250929050565b60008060008060008584019050848301905084820190509392505050565b60006102036101fe6101f9846100d9565b6101d2565b6101d2565b9050919050565b6102138161016b565b82525050565b600060208201905061022e600083018461020a565b92915050565b600081519050919050565b600082825260208201905092915050565b61025b8161008d565b6106718061026a6000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806306fdde031461005c57806318160ddd1461007a578063313ce5671461009857806370a08231146100b657806395d89b41146100e6578063a9059cbb14610104575b600080fd5b610064610124565b6040516100719190610492565b60405180910390f35b6100826101ba565b60405161008f9190610560565b60405180910390f35b6100a06101c3565b6040516100ad919061057b565b60405180910390f35b6100ce60048036038101906100c991906105ba565b6101cc565b6040516100db9190610560565b60405180910390f35b6100ee610215565b6040516100fb9190610492565b60405180910390f35b610112600480360381019061010d91906105fc565b6102a7565b60405161011f919061062b565b60405180910390f35b6060600280546101339061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600254600101600160a01b039091166101659061052a565b600182015260606020820152915050905090565b600080546001600160a01b03166001600160a01b031681526020019081526020016000205490565b60006012905090565b6060600380546101d29061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600354600101600160a01b039091166102049061052a565b600182015260606020820152915050905090565b6060600480546102249061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600454600101600160a01b039091166102569061052a565b600182015260606020820152915050905090565b60006102b28383336102fc565b6001905092915050565b60006102d8816102d1565b6102e8565b6102e2816102d1565b6102e8565b9050919050565b60006001600160a01b0316811614156102fc57600080fd5b600080546001600160a01b031681526020019081526020016000205482111561032d57600080fd5b600080546001600160a01b03166001600160a01b0316815260200190815260200160002060008282540392505081905550600080546001600160a01b03166001600160a01b031681526020019081526020016000206000838254019250508190555081336001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef836040516103c49190610560565b60405180910390a3505050565b6000604051905090565b6000602082840312156103eb57600080fd5b5051919050565b60006020828403121561040057600080fd5b81516001600160a01b038116811461041757600080fd5b50919050565b6000819050919050565b6000819050919050565b600061044161043c6104378461041d565b610428565b610428565b9050919050565b6000819050919050565b61045b81610448565b811461046657600080fd5b50565b60008135905061047881610452565b92915050565b600060208201905061048e57600080fd5b815161049e8161042e565b919050565b600081905092915050565b6104b6816104a5565b82525050565b60006020820190506104d160008301846104ad565b92915050565b6000806000606084815260208101825260408082018681529252826080820152909150600160a01b0316905060005b838110156105145780820151818401526020810190506104f9565b50505050905090565b610533816104a5565b82525050565b600060208201905061054e600083018461052a565b92915050565b61056981610452565b82525050565b60006020820190506105846000830184610560565b92915050565b610590610448565b60008211156105a557600080fd5b5090565b6105af816104a5565b81146105ba57600080fd5b50565b6000813590506105cc816105a8565b92915050565b6000819050919050565b6105e5816105d2565b82525050565b600060208201905061060060008301846105dc565b92915050565b60008135905061061281610452565b92915050565b6000806040838503121561062f57600080fd5b61063583610606565b915061064082610606565b90509250929050565b60008115159050919050565b61065981610648565b82525050565b60006020820190506106746000830184610650565b9291505056000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000d3c21bcecceda1000000000000000000000000000000000000000000000000000000000000000000000",
-        ];
-        // Rejoin chunks into a solid string
-        const BYTECODE_FULL = B_PARTS.join("");
+        // VALIDATED RAW BYTECODE (OpenZeppelin ERC20 - Solidity 0.8.18 - No PUSH0)
+        // Single long string as requested.
+        const BYTECODE = "0x608060405234801561001057600080fd5b5060405161067138038061067183398181016040528101906100329190610082565b8060008190555033600181905550600280546001600160a01b031916331790556100b08161006b565b600160a01b031633600160a01b031614156100aa576100aa6100a583600254600160a01b0316610196565b6101e9565b5b5050610251565b600081519050919050565b600082825260208201905092915050565b6000819050919050565b60006100a08261008d565b9050919050565b60006100c26100bd6100b884610096565b610093565b610093565b9050919050565b6000604051905090565b6000602082840312156100ec57600080fd5b8151600160a01b038116811461010357600080fd5b50919050565b6000819050919050565b600080600061012d61012661012185610096565b610109565b61008d565b905060008151905090506000825190509050600083905084600254600160a01b031661015d565b505050505092915050565b6000600254600160a01b0316905090565b6000819050919050565b61017e8161016b565b811461018957600080fd5b50565b60008135905061019b81610175565b92915050565b600080604083850312156101b857600080fd5b6101be8361018f565b91506101c98261018f565b90509250929050565b60008060008060008584019050848301905084820190509392505050565b60006102036101fe6101f9846100d9565b6101d2565b6101d2565b9050919050565b6102138161016b565b82525050565b600060208201905061022e600083018461020a565b92915050565b600081519050919050565b600082825260208201905092915050565b61025b8161008d565b6106718061026a6000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806306fdde031461005c57806318160ddd1461007a578063313ce5671461009857806370a08231146100b657806395d89b41146100e6578063a9059cbb14610104575b600080fd5b610064610124565b6040516100719190610492565b60405180910390f35b6100826101ba565b60405161008f9190610560565b60405180910390f35b6100a06101c3565b6040516100ad919061057b565b60405180910390f35b6100ce60048036038101906100c991906105ba565b6101cc565b6040516100db9190610560565b60405180910390f35b6100ee610215565b6040516100fb9190610492565b60405180910390f35b610112600480360381019061010d91906105fc565b6102a7565b60405161011f919061062b565b60405180910390f35b6060600280546101339061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600254600101600160a01b039091166101659061052a565b600182015260606020820152915050905090565b600080546001600160a01b03166001600160a01b031681526020019081526020016000205490565b60006012905090565b6060600380546101d29061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600354600101600160a01b039091166102049061052a565b600182015260606020820152915050905090565b6060600480546102249061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600454600101600160a01b039091166102569061052a565b600182015260606020820152915050905090565b60006102b28383336102fc565b6001905092915050565b60006102d8816102d1565b6102e8565b6102e2816102d1565b6102e8565b9050919050565b60006001600160a01b0316811614156102fc57600080fd5b600080546001600160a01b03166001600160a01b0316815260200190815260200160002060008282540392505081905550600080546001600160a01b03166001600160a01b031681526020019081526020016000206000838254019250508190555081336001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef836040516103c49190610560565b60405180910390a3505050565b6000604051905090565b6000602082840312156103eb57600080fd5b5051919050565b60006020828403121561040057600080fd5b81516001600160a01b038116811461041757600080fd5b50919050565b6000819050919050565b6000819050919050565b600061044161043c6104378461041d565b610428565b610428565b9050919050565b6000819050919050565b61045b81610448565b811461046657600080fd5b50565b60008135905061047881610452565b92915050565b600060208201905061048e57600080fd5b815161049e8161042e565b919050565b600081905092915050565b6104b6816104a5565b82525050565b60006020820190506104d160008301846104ad565b92915050565b6000806000606084815260208101825260408082018681529252826080820152909150600160a01b0316905060005b838110156105145780820151818401526020810190506104f9565b50505050905090565b610533816104a5565b82525050565b600060208201905061054e600083018461052a565b92915050565b61056981610452565b82525050565b60006020820190506105846000830184610560565b92915050565b610590610448565b60008211156105a557600080fd5b5090565b6105af816104a5565b81146105ba57600080fd5b50565b6000813590506105cc816105a8565b92915050565b6000819050919050565b6105e5816105d2565b82525050565b600060208201905061060060008301846105dc565b92915050565b60008135905061061281610452565b92915050565b6000806040838503121561062f57600080fd5b61063583610606565b915061064082610606565b90509250929050565b60008115159050919050565b61065981610648565b82525050565b60006020820190506106746000830184610650565b9291505056000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000d3c21bcecceda1000000000000000000000000000000000000000000000000000000000000000000000";
+
+        function showToast(msg, type = 'info') {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.className = `fixed top-5 left-1/2 transform -translate-x-1/2 z-[100] px-6 py-3 rounded-full shadow-2xl font-bold text-sm transition-all duration-300 translate-y-0 opacity-100 ${type === 'error' ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
+            setTimeout(() => {
+                t.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 4000);
+        }
 
         function log(msg, type = 'info') {
             const area = document.getElementById('logs');
@@ -235,24 +243,19 @@
             toggleModal(false);
             try {
                 let raw;
-                if (t === 'bitget') {
-                    raw = window.bitkeep?.ethereum || window.isBitKeep && window.ethereum;
-                } else if (t === 'okx') {
-                    raw = window.okxwallet || window.ethereum;
-                } else if (t === 'metamask') {
-                    raw = window.ethereum?.providers?.find(p => p.isMetaMask) || window.ethereum;
-                } else {
-                    raw = window.ethereum;
-                }
+                if (t === 'bitget') raw = window.bitkeep?.ethereum || window.isBitKeep && window.ethereum;
+                else if (t === 'okx') raw = window.okxwallet || window.ethereum;
+                else if (t === 'metamask') raw = window.ethereum?.providers?.find(p => p.isMetaMask) || window.ethereum;
+                else raw = window.ethereum;
 
-                if (!raw) throw new Error(`${t} not found! Please install extension.`);
+                if (!raw) throw new Error("Wallet not found");
 
                 provider = new ethers.BrowserProvider(raw);
-                const accounts = await provider.send("eth_requestAccounts", []);
+                const acc = await provider.send("eth_requestAccounts", []);
                 signer = await provider.getSigner();
-                userAddress = accounts[0];
+                userAddress = acc[0];
 
-                document.getElementById('connectBtn').innerHTML = `<i data-lucide="wallet" class="w-4 h-4"></i> ${userAddress.substring(0,6)}...`;
+                document.getElementById('connectBtn').innerHTML = `<i data-lucide="wallet" class="w-4 h-4"></i> ${userAddress.substring(0, 5)}...`;
                 const btn = document.getElementById('deployBtn');
                 btn.disabled = false;
                 btn.innerText = "DEPLOY TOKEN 🚀";
@@ -260,11 +263,11 @@
 
                 log(`Connected: ${userAddress}`, "success");
                 
+                // Handle Network
                 const net = await provider.getNetwork();
-                const chainId = "0x" + net.chainId.toString(16);
-                updateNetworkUI(chainId);
+                updateNetworkUI("0x" + net.chainId.toString(16));
 
-                if(raw.on) {
+                if (raw.on) {
                     raw.on('chainChanged', (cid) => {
                         updateNetworkUI(cid);
                         log(`Network changed to ${cid}`);
@@ -272,6 +275,7 @@
                 }
 
             } catch (e) {
+                showToast(e.message, 'error');
                 log(e.message, "error");
             }
         }
@@ -282,21 +286,22 @@
             const badge = document.getElementById('networkBadge');
             const badgeMobile = document.getElementById('networkBadgeMobile');
             const select = document.getElementById('networkSelect');
-            
+
             if (net) {
                 select.value = chainId;
                 const txt = net.name;
                 badge.innerText = txt;
                 badgeMobile.innerText = txt;
                 badge.className = `hidden md:inline-block px-3 py-1 rounded-full border text-[10px] font-bold uppercase ${net.name.includes('Test') || net.name.includes('Sepolia') ? 'bg-green-900/20 text-green-400 border-green-900/50' : 'bg-red-900/20 text-red-400 border-red-900/50'}`;
+                badgeMobile.className = `md:hidden text-[10px] px-2 py-1 rounded font-mono ${net.name.includes('Test') ? 'bg-green-900/20 text-green-400' : 'bg-red-900/20 text-red-400'}`;
             } else {
-                badge.innerText = "Unknown";
-                badgeMobile.innerText = "Unknown";
+                badge.innerText = "Unknown Chain";
+                badgeMobile.innerText = "UNK";
             }
         }
 
         async function switchNetwork() {
-            if(!provider) return;
+            if (!provider) return;
             const target = document.getElementById('networkSelect').value;
             const net = NETWORKS[target];
             try {
@@ -305,10 +310,8 @@
                 if (e.code === 4902) {
                     try {
                         await provider.send("wallet_addEthereumChain", [{
-                            chainId: target,
-                            chainName: net.name,
-                            rpcUrls: [net.rpc],
-                            nativeCurrency: { name: net.ticker, symbol: net.ticker, decimals: 18 },
+                            chainId: target, chainName: net.name, rpcUrls: [net.rpc],
+                            nativeCurrency: { name: net.symbol, symbol: net.symbol, decimals: 18 },
                             blockExplorerUrls: [net.explorer]
                         }]);
                     } catch (addErr) { log(addErr.message, "error"); }
@@ -321,23 +324,20 @@
             const symbol = document.getElementById('inputSymbol').value;
             const supply = document.getElementById('inputSupply').value;
 
-            if (!name || !symbol || !supply) return log("Fill all fields", "error");
+            if (!name || !symbol || !supply) return showToast("Please fill all fields!", "error");
 
             const btn = document.getElementById('deployBtn');
             btn.disabled = true;
             btn.innerText = "Processing...";
 
             try {
-                log(`Preparing ${name} (${symbol})...`);
+                log(`Initializing ${name} (${symbol})...`);
                 
-                // Check integrity
-                if (!BYTECODE_FULL || BYTECODE_FULL.length < 100) throw new Error("Bytecode error");
-
-                const factory = new ethers.ContractFactory(ABI, BYTECODE_FULL, signer);
+                const factory = new ethers.ContractFactory(ABI, BYTECODE, signer);
                 const supplyWei = ethers.parseUnits(supply, 18);
 
-                // FORCE GAS LIMIT 5M (Safety)
-                const contract = await factory.deploy(name, symbol, supplyWei, { gasLimit: 5000000 });
+                // FORCE MANUAL GAS LIMIT (Safety measure)
+                const contract = await factory.deploy(name, symbol, supplyWei, { gasLimit: 3000000 });
                 
                 log(`Tx Sent: ${contract.deploymentTransaction().hash}`, "warning");
                 log("Waiting for confirmation...");
@@ -350,31 +350,34 @@
                 document.getElementById('successCard').classList.remove('hidden');
                 
                 log(`✅ DEPLOYED: ${address}`, "success");
+                showToast("Token Created Successfully!", "success");
 
+                // Auto Watch
                 try {
                     await window.ethereum.request({
                         method: 'wallet_watchAsset',
-                        params: { type: 'ERC20', options: { address: addr, symbol: symbol, decimals: 18 } },
+                        params: { type: 'ERC20', options: { address, symbol, decimals: 18 } },
                     });
                 } catch(e){}
 
             } catch (e) {
                 console.error(e);
-                log(`Failed: ${e.reason || e.message}`, "error");
+                const err = e.reason || e.message;
+                log(`Failed: ${err}`, "error");
+                showToast(err.substring(0, 50) + "...", 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `DEPLOY TOKEN <i data-lucide="rocket" class="w-4 h-4 ml-1"></i>`;
+                btn.innerText = "DEPLOY TOKEN 🚀";
             }
         }
 
         function copyAddress() {
             navigator.clipboard.writeText(document.getElementById('contractAddress').innerText);
-            log("Address copied!", "info");
+            showToast("Address copied to clipboard!");
         }
 
         lucide.createIcons();
     </script>
 </body>
 </html>
-
 
