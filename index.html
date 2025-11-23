@@ -3,21 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVM Launcher (Ultimate Fix)</title>
+    <title>EVM Token Launchpad (Force Mode)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } } }
-    </script>
+    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } } }</script>
     <style>
         body { background-color: #020617; color: #e2e8f0; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; background: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative overflow-x-hidden">
@@ -26,7 +23,7 @@
     <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300" id="modalContent">
             <div class="p-4 border-b border-slate-800 flex justify-between items-center">
-                <h3 class="font-bold text-white">Select Wallet</h3>
+                <h3 class="font-bold text-white">Pilih Wallet</h3>
                 <button onclick="toggleModal(false)" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-4 space-y-3">
@@ -46,12 +43,12 @@
     <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 h-auto py-4 px-4">
         <div class="max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2">
-                <i data-lucide="layers" class="text-indigo-500"></i>
-                <span class="font-bold text-lg">EVM<span class="text-indigo-400">Deployer</span></span>
+                <i data-lucide="zap" class="text-indigo-500"></i>
+                <span class="font-bold text-lg">EVM<span class="text-indigo-400">Launcher</span></span>
             </div>
             <div class="flex items-center gap-3 w-full md:w-auto">
                 <div class="relative group flex-1 md:flex-none w-full">
-                    <select id="networkSelect" onchange="handleNetworkChange()" class="w-full md:w-64 appearance-none bg-slate-800 border border-slate-700 text-white text-xs rounded-lg pl-3 pr-8 py-3 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                    <select id="networkSelect" onchange="handleNetworkChange()" class="w-full md:w-64 appearance-none bg-slate-800 border border-slate-700 text-white text-xs rounded-lg pl-3 pr-8 py-3 focus:ring-2 focus:ring-indigo-500 outline-none font-medium cursor-pointer">
                         <optgroup label="--- TESTNETS ---">
                             <option value="0xaa36a7" selected>Sepolia Testnet</option>
                             <option value="0x14a34">Base Sepolia</option>
@@ -88,19 +85,15 @@
                 
                 <div class="space-y-5">
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-semibold text-slate-400 mb-1 uppercase">Nama</label><input id="inputName" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-indigo-500 outline-none" placeholder="Bitcoin"></div>
+                        <div><label class="block text-xs font-semibold text-slate-400 mb-1 uppercase">Nama Token</label><input id="inputName" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-indigo-500 outline-none" placeholder="Bitcoin"></div>
                         <div><label class="block text-xs font-semibold text-slate-400 mb-1 uppercase">Simbol</label><input id="inputSymbol" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-indigo-500 outline-none" placeholder="BTC"></div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase">Supply</label>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase">Total Supply</label>
                         <input type="number" id="inputSupply" value="1000000000" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-indigo-500 outline-none font-mono">
                     </div>
 
-                    <button id="btnDeploy" onclick="deployToken()" disabled class="w-full py-4 rounded-xl font-bold text-lg bg-slate-800 text-slate-500 cursor-not-allowed transition-all shadow-lg">Connect First</button>
-                    
-                    <div class="text-[10px] text-slate-500 text-center">
-                        Jika simulasi gagal, sistem akan otomatis menggunakan <b>Force Deploy</b> (Gas Limit 5M).
-                    </div>
+                    <button id="btnDeploy" onclick="deployToken()" disabled class="w-full py-4 rounded-xl font-bold text-lg bg-slate-800 text-slate-500 cursor-not-allowed transition-all shadow-lg">Pilih Wallet Dulu</button>
                 </div>
             </div>
         </div>
@@ -114,7 +107,7 @@
             </div>
 
             <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden flex flex-col h-[400px] shadow-xl">
-                <div class="bg-slate-900 p-3 border-b border-slate-800 flex justify-between items-center"><div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4"></i> Logs</div></div>
+                <div class="bg-slate-900 p-3 border-b border-slate-800 flex justify-between items-center"><div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4"></i> System Logs</div></div>
                 <div id="logsArea" class="flex-1 p-4 overflow-y-auto font-mono text-xs space-y-2 custom-scrollbar bg-[#0c0f1c]"></div>
             </div>
         </div>
@@ -135,9 +128,9 @@
 
         let provider, signer, userAddress, currentChainId = "0xaa36a7";
 
-        // VERIFIED BYTECODE: OpenZeppelin ERC20 (Name, Symbol, Supply) - No Custom Logic to Fail
+        // STANDARD ERC20 BYTECODE (No Tax, No Logic, Just standard Token)
         const STANDARD_ABI = ["constructor(string name, string symbol, uint256 initialSupply)"];
-        const BYTECODE_BASE = "0x608060405234801561001057600080fd5b5060405161066738038061066783398181016040528101906100329190610082565b8060008190555033600181905550600280546001600160a01b031916331790556100b08161006b565b600160a01b031633600160a01b031614156100aa576100aa6100a583600254600160a01b0316610214565b610267565b5b50506102d3565b600081519050919050565b600082825260208201905092915050565b6000819050919050565b60006100a08261008d565b9050919050565b60006100c26100bd6100b884610096565b610093565b610093565b9050919050565b6000604051905090565b6000602082840312156100ec57600080fd5b8151600160a01b038116811461010357600080fd5b50919050565b6000819050919050565b600080600061012d61012661012185610096565b610109565b61008d565b905060008151905090506000825190509050600083905084600254600160a01b031661015d565b505050505092915050565b6000600254600160a01b0316905090565b6000819050919050565b61017e8161016b565b811461018957600080fd5b50565b60008135905061019b81610175565b92915050565b600080604083850312156101b857600080fd5b6101be8361018f565b91506101c98261018f565b90509250929050565b60008060008060008584019050848301905084820190509392505050565b60006102036101fe6101f9846100d9565b6101d2565b6101d2565b9050919050565b6102138161016b565b82525050565b600060208201905061022e600083018461020a565b92915050565b600081519050919050565b600082825260208201905092915050565b6102dd8161008d565b6106e2806102ec6000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806306fdde031461005c57806318160ddd1461007a578063313ce5671461009857806370a08231146100b657806395d89b41146100e6578063a9059cbb14610104575b600080fd5b610064610124565b6040516100719190610492565b60405180910390f35b6100826101ba565b60405161008f91906105d1565b60405180910390f35b6100a06101c3565b6040516100ad91906105ec565b60405180910390f35b6100ce60048036038101906100c9919061062b565b6101cc565b6040516100db91906105d1565b60405180910390f35b6100ee610215565b6040516100fb9190610492565b60405180910390f35b610112600480360381019061010d919061066d565b6102a7565b60405161011f919061069c565b60405180910390f35b606060028054610133906106ab565b80601f01602080910402602001604051908101604052809291908181526032820152600254600101600160a01b039091166101659061059b565b600182015260606020820152915050905090565b600080546001600160a01b03166001600160a01b031681526020019081526020016000205490565b60006012905090565b6060600380546101d2906106ab565b80601f01602080910402602001604051908101604052809291908181526032820152600354600101600160a01b039091166102049061059b565b600182015260606020820152915050905090565b606060048054610224906106ab565b80601f01602080910402602001604051908101604052809291908181526032820152600454600101600160a01b039091166102569061059b565b600182015260606020820152915050905090565b60006102b28383336102fc565b6001905092915050565b60006102d8816102d1565b6102e8565b6102e2816102d1565b6102e8565b9050919050565b60006001600160a01b0316811614156102fc57600080fd5b600080546001600160a01b03166001600160a01b031681526020019081526020016000205482111561032d57600080fd5b600080546001600160a01b03166001600160a01b0316815260200190815260200160002060008282540392505081905550600080546001600160a01b03166001600160a01b031681526020019081526020016000206000838254019250508190555081336001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef836040516103c49190610560565b60405180910390a3505050565b6000604051905090565b6000602082840312156103eb57600080fd5b5051919050565b60006020828403121561040057600080fd5b81516001600160a01b038116811461041757600080fd5b50919050565b6000819050919050565b6000819050919050565b600061044161043c6104378461041d565b610428565b610428565b9050919050565b6000819050919050565b61045b81610448565b811461046657600080fd5b50565b60008135905061047881610452565b92915050565b600060208201905061048e57600080fd5b815161049e8161042e565b919050565b600081905092915050565b6104b6816104a5565b82525050565b60006020820190506104d160008301846104ad565b92915050565b6000806000606084815260208101825260408082018681529252826080820152909150600160a01b0316905060005b838110156105145780820151818401526020810190506104f9565b50505050905090565b610533816104a5565b82525050565b600060208201905061054e600083018461052a565b92915050565b61056981610452565b82525050565b60006020820190506105846000830184610560565b92915050565b610590610448565b60008211156105a557600080fd5b5090565b6105af816104a5565b81146105ba57600080fd5b50565b6000813590506105cc816105a8565b92915050565b6000819050919050565b6105e5816105d2565b82525050565b600060208201905061060060008301846105dc565b92915050565b60008135905061061281610452565b92915050565b6000806040838503121561062f57600080fd5b61063583610606565b915061064082610606565b90509250929050565b60008115159050919050565b61065981610648565b82525050565b60006020820190506106746000830184610650565b9291505056";
+        const BYTECODE_BASE = "0x608060405234801561001057600080fd5b5060405161066738038061066783398181016040528101906100329190610082565b8060008190555033600181905550600280546001600160a01b031916331790556100b08161006b565b600160a01b031633600160a01b031614156100aa576100aa6100a583600254600160a01b0316610214565b610267565b5b50506102d3565b600081519050919050565b600082825260208201905092915050565b6000819050919050565b60006100a08261008d565b9050919050565b60006100c26100bd6100b884610096565b610093565b610093565b9050919050565b6000604051905090565b6000602082840312156100ec57600080fd5b8151600160a01b038116811461010357600080fd5b50919050565b6000819050919050565b600080600061012d61012661012185610096565b610109565b61008d565b905060008151905090506000825190509050600083905084600254600160a01b031661015d565b505050505092915050565b6000600254600160a01b0316905090565b6000819050919050565b61017e8161016b565b811461018957600080fd5b50565b60008135905061019b81610175565b92915050565b600080604083850312156101b857600080fd5b6101be8361018f565b91506101c98261018f565b90509250929050565b60008060008060008584019050848301905084820190509392505050565b60006102036101fe6101f9846100d9565b6101d2565b6101d2565b9050919050565b6102138161016b565b82525050565b600060208201905061022e600083018461020a565b92915050565b600081519050919050565b600082825260208201905092915050565b6102dd8161008d565b6106e2806102ec6000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806306fdde031461005c57806318160ddd1461007a578063313ce5671461009857806370a08231146100b657806395d89b41146100e6578063a9059cbb14610104575b600080fd5b610064610124565b6040516100719190610492565b60405180910390f35b6100826101ba565b60405161008f91906105d1565b60405180910390f35b6100a06101c3565b6040516100ad91906105ec565b60405180910390f35b6100ce60048036038101906100c9919061062b565b6101cc565b6040516100db91906105d1565b60405180910390f35b6100ee610215565b6040516100fb9190610492565b60405180910390f35b610112600480360381019061010d919061066d565b6102a7565b60405161011f919061069c565b60405180910390f35b606060028054610133906106ab565b80601f01602080910402602001604051908101604052809291908181526032820152600254600101600160a01b039091166101659061059b565b600182015260606020820152915050905090565b600080546001600160a01b03166001600160a01b031681526020019081526020016000205490565b60006012905090565b6060600380546101d2906106ab565b80601f01602080910402602001604051908101604052809291908181526032820152600354600101600160a01b039091166102049061059b565b600182015260606020820152915050905090565b606060048054610224906106ab565b80601f01602080910402602001604051908101604052809291908181526032820152600454600101600160a01b039091166102569061059b565b600182015260606020820152915050905090565b60006102b28383336102fc565b6001905092915050565b60006102d8816102d1565b6102e8565b6102e2816102d1565b6102e8565b9050919050565b60006001600160a01b0316811614156102fc57600080fd5b600080546001600160a01b03166001600160a01b031681526020019081526020016000205482111561032d57600080fd5b600080546001600160a01b03166001600160a01b0316815260200190815260200160002060008282540392505081905550600080546001600160a01b03166001600160a01b031681526020019081526020016000206000838254019250508190555081336001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef836040516103c49190610560565b60405180910390a3505050565b6000604051905090565b6000602082840312156103eb57600080fd5b5051919050565b60006020828403121561040057600080fd5b81516001600160a01b038116811461041757600080fd5b50919050565b6000819050919050565b6000819050919050565b600061044161043c6104378461041d565b610428565b610428565b9050919050565b6000819050919050565b61045b81610448565b811461046657600080fd5b50565b60008135905061047881610452565b92915050565b60006020828403121561048e57600080fd5b815161049e8161042e565b919050565b600081905092915050565b6104b6816104a5565b82525050565b60006020820190506104d160008301846104ad565b92915050565b6000806000606084815260208101825260408082018681529252826080820152909150600160a01b0316905060005b838110156105145780820151818401526020810190506104f9565b50505050905090565b610533816104a5565b82525050565b600060208201905061054e600083018461052a565b92915050565b61056981610452565b82525050565b60006020820190506105846000830184610560565b92915050565b610590610448565b60008211156105a557600080fd5b5090565b6105af816104a5565b81146105ba57600080fd5b50565b6000813590506105cc816105a8565b92915050565b6000819050919050565b6105e5816105d2565b82525050565b600060208201905061060060008301846105dc565b92915050565b60008135905061061281610452565b92915050565b6000806040838503121561062f57600080fd5b61063583610606565b915061064082610606565b90509250929050565b60008115159050919050565b61065981610648565b82525050565b60006020820190506106746000830184610650565b9291505056";
 
         function addLog(msg, type='info') {
             const area = document.getElementById('logsArea');
@@ -211,47 +204,41 @@
 
                 addLog(`Deploying ${name} to ${net.name}...`);
                 
-                // --- THE FIX: SMART FALLBACK STRATEGY ---
-                let contract;
+                let contractAddress;
+                
                 try {
-                    // 1. Try Normal Deploy (Allows Estimation)
-                    contract = await factory.deploy(name, symbol, supplyWei);
-                } catch (estError) {
-                    // 2. If Estimation Fails, FORCE DEPLOY (Blind Send)
-                    if (estError.code === 'CALL_EXCEPTION' || estError.message.includes('estimateGas')) {
-                        addLog("Simulasi gagal (RPC Limit). Mengaktifkan FORCE DEPLOY...", "warning");
+                    // ATTEMPT 1: Normal Deploy
+                    const contract = await factory.deploy(name, symbol, supplyWei);
+                    addLog(`Tx Sent: ${contract.deploymentTransaction().hash}`, "warning");
+                    await contract.waitForDeployment();
+                    contractAddress = contract.target;
+                } catch (err) {
+                    // ATTEMPT 2: Force Deploy (Manual Gas Limit)
+                    // Cek apakah errornya karena simulasi gas
+                    if (err.code === 'CALL_EXCEPTION' || err.message.includes('estimateGas') || err.code === 'UNPREDICTABLE_GAS_LIMIT') {
+                        addLog("Simulasi gagal. Mengaktifkan FORCE MODE (Gas Limit 5M)...", "warning");
                         
-                        // Construct Raw Transaction Data manually
-                        const deployTx = await factory.getDeployTransaction(name, symbol, supplyWei);
+                        const txData = await factory.getDeployTransaction(name, symbol, supplyWei);
                         
-                        // Force send with manual Gas Limit
                         const tx = await signer.sendTransaction({
-                            ...deployTx,
-                            gasLimit: 5000000 // Huge limit to guarantee execution
+                            data: txData.data,
+                            gasLimit: 5000000 // Force high gas limit
                         });
+
+                        addLog(`Force Tx Sent: ${tx.hash}`, "warning");
+                        addLog("Menunggu konfirmasi...", "info");
                         
-                        // Manually wrap result into a contract instance
-                        contract = new ethers.BaseContract(null, STANDARD_ABI, signer);
-                        contract.deploymentTransaction = () => tx;
-                        contract.target = "Waiting..."; // Will be resolved later
-                        
-                        addLog(`Force Sent! Hash: ${tx.hash}`, "success");
                         const receipt = await tx.wait();
-                        contract.target = receipt.contractAddress;
+                        contractAddress = receipt.contractAddress;
                     } else {
-                        throw estError;
+                        throw err; // Lempar error lain (user reject, dll)
                     }
                 }
 
-                if(contract.deploymentTransaction) addLog(`Tx Hash: ${contract.deploymentTransaction().hash}`, "success");
-                
-                if (contract.waitForDeployment) await contract.waitForDeployment();
-                
-                const address = contract.target;
-                document.getElementById('deployedAddress').innerText = address;
-                document.getElementById('etherscanLink').href = `${net.explorer}/address/${address}`;
+                document.getElementById('deployedAddress').innerText = contractAddress;
+                document.getElementById('etherscanLink').href = `${net.explorer}/address/${contractAddress}`;
                 document.getElementById('successCard').classList.remove('hidden');
-                addLog(`CONTRACT DEPLOYED: ${address}`, "success");
+                addLog(`SUCCESS! Address: ${contractAddress}`, "success");
 
             } catch(e) {
                 console.error(e);
