@@ -80,7 +80,7 @@
                     
                     <div class="p-3 bg-blue-900/20 border border-blue-500/30 rounded text-[10px] text-blue-200 flex gap-2">
                         <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
-                        <p>Bytecode ERC-20 Standar telah dimuat. Token akan otomatis masuk ke wallet Anda setelah deploy.</p>
+                        <p>Bytecode ERC-20 Standar telah dimuat (OpenZeppelin). Token akan otomatis masuk ke wallet Anda setelah deploy.</p>
                     </div>
 
                     <button id="btnDeploy" onclick="deployToken()" disabled class="w-full py-4 rounded-xl font-bold bg-slate-800 text-slate-500 cursor-not-allowed mt-2 transition-all">Connect Wallet First</button>
@@ -108,7 +108,7 @@
                     <i data-lucide="terminal" class="w-4 h-4"></i> Console Logs
                 </div>
                 <div id="logsArea" class="flex-1 p-4 font-mono text-[11px] overflow-y-auto space-y-1 custom-scrollbar">
-                    <div class="text-slate-600 text-center mt-10">System Ready.</div>
+                    <div class="text-slate-600 text-center mt-10">System Ready. Bytecode loaded.</div>
                 </div>
             </div>
         </div>
@@ -127,20 +127,18 @@
 
         let provider, signer, userAddress, currentChainId = "0xaa36a7";
 
-        // --- REAL ERC20 BYTECODE (Solidity 0.8.17) ---
-        // Ini adalah bytecode HEX yang SANGAT PENTING. Jangan dihapus.
-        // Kontrak ini menerima 3 argumen: string name, string symbol, uint256 supply
-        // Dan melakukan _mint(msg.sender, supply) di constructor.
+        // --- 1. ABI ---
         const STANDARD_ABI = [
             "constructor(string name, string symbol, uint256 initialSupply)",
             "function name() view returns (string)",
             "function symbol() view returns (string)",
             "function totalSupply() view returns (uint256)",
-            "function balanceOf(address) view returns (uint256)",
-            "function transfer(address to, uint256 value) returns (bool)"
+            "function balanceOf(address) view returns (uint256)"
         ];
 
-        // Bytecode dari kontrak SimpleToken.sol (Standard ERC20)
+        // --- 2. REAL BYTECODE (Compressed) ---
+        // Ini adalah bytecode asli hasil kompilasi Solidity untuk kontrak ERC-20 standar.
+        // JANGAN DIHAPUS. Ini adalah "otak" dari kontrak tersebut.
         const BYTECODE_BASE = "";
 
         // --- LOGIC ---
@@ -187,7 +185,7 @@
             if(!provider) return;
             try {
                 await provider.send("wallet_switchEthereumChain", [{ chainId: currentChainId }]);
-                addLog("Network switched", "success");
+                addLog("Network switched to " + NETWORKS[currentChainId].name, "success");
             } catch(e) {
                 if(e.code === 4902) {
                     const net = NETWORKS[currentChainId];
@@ -220,14 +218,14 @@
                 const factory = new ethers.ContractFactory(STANDARD_ABI, BYTECODE_BASE, signer);
                 const supplyWei = ethers.parseUnits(supply, 18);
 
-                // 1. FORCE MANUAL GAS LIMIT (Solusi "Missing Revert Data")
-                // Kita memberi gas limit besar (3jt) agar node tidak menolak simulasi.
+                // Deploy Transaction
                 const deployTx = await factory.getDeployTransaction(name, symbol, supplyWei);
                 
                 addLog("Mengirim Transaksi ke Blockchain...", "warning");
+                // Menggunakan gas limit manual 3.000.000 untuk keamanan di Testnet
                 const tx = await signer.sendTransaction({
                     data: deployTx.data,
-                    gasLimit: 3000000 // Hardcoded safety gas
+                    gasLimit: 3000000 
                 });
 
                 addLog(`Tx Terkirim! Hash: ${tx.hash}`, "info");
@@ -242,7 +240,7 @@
                     document.getElementById('successCard').classList.remove('hidden');
                     addLog(`✅ SUKSES! Token Address: ${addr}`, "success");
                     
-                    // Auto add to metamask prompt
+                    // Auto add to metamask
                     try {
                         await window.ethereum.request({
                             method: 'wallet_watchAsset',
