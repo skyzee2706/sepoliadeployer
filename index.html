@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVM Token Launchpad (Auto Gas)</title>
+    <title>EVM Token Launchpad (Auto RPC)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -51,16 +51,16 @@
 
     <!-- NAVBAR -->
     <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 h-20 flex items-center px-4 justify-between w-full">
-        <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+        <div class="max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2">
-                <i data-lucide="zap" class="text-yellow-500 fill-yellow-500"></i>
-                <span class="font-bold text-lg hidden md:block">EVM<span class="text-yellow-400">Launcher</span></span>
+                <i data-lucide="zap" class="text-purple-500 fill-purple-500"></i>
+                <span class="font-bold text-lg">EVM<span class="text-purple-400">Launcher</span></span>
             </div>
             
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 w-full md:w-auto">
                 <!-- Network Selector -->
-                <div class="relative group">
-                    <select id="networkSelect" onchange="handleNetworkChange()" class="appearance-none bg-slate-800 border border-slate-700 text-white text-xs md:text-sm rounded-lg pl-3 pr-8 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer font-medium">
+                <div class="relative group flex-1 md:flex-none">
+                    <select id="networkSelect" onchange="handleNetworkChange()" class="w-full md:w-auto appearance-none bg-slate-800 border border-slate-700 text-white text-xs md:text-sm rounded-lg pl-3 pr-8 py-2.5 focus:ring-2 focus:ring-purple-500 outline-none cursor-pointer font-medium">
                         <optgroup label="--- TESTNETS (FREE) ---">
                             <option value="0xaa36a7" selected>Sepolia Testnet</option>
                             <option value="0x14a34">Base Sepolia</option>
@@ -71,15 +71,15 @@
                             <option value="0x2105">Base Mainnet</option>
                             <option value="0xa4b1">Arbitrum One</option>
                             <option value="0xa">Optimism</option>
-                            <option value="0x89">Polygon (MATIC)</option>
-                            <option value="0xa86a">Avalanche C-Chain</option>
+                            <option value="0x89">Polygon</option>
+                            <option value="0xa86a">Avalanche</option>
                         </optgroup>
                     </select>
                     <i data-lucide="chevron-down" class="absolute right-2.5 top-3 w-4 h-4 text-slate-400 pointer-events-none"></i>
                 </div>
 
-                <button id="btnConnect" onclick="toggleModal(true)" class="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20 transition-all">
-                    Hubungkan Dompet
+                <button id="btnConnect" onclick="toggleModal(true)" class="whitespace-nowrap flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm bg-purple-600 text-white hover:bg-purple-500 shadow-lg shadow-purple-500/20 transition-all">
+                    Connect Wallet
                 </button>
             </div>
         </div>
@@ -94,31 +94,31 @@
                 <i id="networkIcon" data-lucide="test-tube-2" class="w-5 h-5 text-green-400 mt-0.5 shrink-0"></i>
                 <div>
                     <h4 id="networkNameDisplay" class="text-sm font-bold text-green-400">Testnet Mode Active</h4>
-                    <p id="networkDescDisplay" class="text-xs text-slate-400">Aset yang dibuat tidak memiliki nilai nyata. Aman untuk eksperimen.</p>
+                    <p id="networkDescDisplay" class="text-xs text-slate-400">Aset yang dibuat tidak memiliki nilai nyata.</p>
                 </div>
             </div>
 
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl animate-fade-in relative overflow-hidden">
                 <!-- Background Glow -->
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-yellow-500"></div>
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500"></div>
 
-                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2"><i data-lucide="coins" class="text-yellow-500"></i> Konfigurasi Token</h2>
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2"><i data-lucide="coins" class="text-purple-500"></i> Buat Token</h2>
                 
                 <div class="space-y-5">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase">Nama Token</label>
-                            <input type="text" id="inputName" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="Ex: Pepe Coin">
+                            <input type="text" id="inputName" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-purple-500 outline-none transition-colors" placeholder="Ex: Pepe Coin">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase">Ticker</label>
-                            <input type="text" id="inputSymbol" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="PEPE">
+                            <input type="text" id="inputSymbol" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-purple-500 outline-none transition-colors" placeholder="PEPE">
                         </div>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase">Total Supply</label>
                         <div class="relative">
-                            <input type="number" id="inputSupply" value="1000000" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none font-mono">
+                            <input type="number" id="inputSupply" value="1000000000" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-purple-500 outline-none font-mono">
                             <span class="absolute right-3 top-3 text-xs text-slate-600 font-bold">TOKENS</span>
                         </div>
                     </div>
@@ -126,21 +126,17 @@
                     <!-- Contract Type Info -->
                     <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg">
                         <div class="flex items-center justify-between text-xs mb-1">
-                            <span class="text-slate-400">Contract Type:</span>
-                            <span class="text-blue-300 font-mono">Standard ERC-20</span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs mb-1">
-                            <span class="text-slate-400">Verification:</span>
-                            <span class="text-green-400">Auto-Verified (Standard)</span>
+                            <span class="text-slate-400">Codebase:</span>
+                            <span class="text-blue-300 font-mono">OpenZeppelin ERC20</span>
                         </div>
                         <div class="flex items-center justify-between text-xs">
                             <span class="text-slate-400">Ownership:</span>
-                            <span class="text-yellow-400">Owner = Wallet Anda</span>
+                            <span class="text-green-400">Wallet Creator</span>
                         </div>
                     </div>
 
                     <button id="btnDeploy" onclick="deployToken()" disabled class="w-full py-4 rounded-xl font-bold text-lg bg-slate-800 text-slate-500 cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg">
-                        Hubungkan Wallet Dulu
+                        Connect Wallet First
                     </button>
                 </div>
             </div>
@@ -152,19 +148,19 @@
                 <div class="absolute -right-6 -top-6 w-24 h-24 bg-green-500/20 blur-2xl rounded-full pointer-events-none"></div>
                 <div class="flex items-center gap-3 mb-3 relative z-10">
                     <div class="bg-green-500 p-1.5 rounded-full"><i data-lucide="check" class="text-white w-4 h-4"></i></div>
-                    <h3 class="font-bold text-white">Deployment Berhasil!</h3>
+                    <h3 class="font-bold text-white">Success!</h3>
                 </div>
                 <div class="bg-slate-950/50 border border-green-500/20 rounded p-3 mb-3 flex justify-between items-center relative z-10">
                     <code id="deployedAddress" class="text-green-400 font-mono text-xs truncate">0x...</code>
                     <button onclick="copyAddress()" class="text-slate-400 hover:text-white text-xs px-2 bg-white/5 rounded py-1">Copy</button>
                 </div>
-                <a id="etherscanLink" href="#" target="_blank" class="block text-center w-full bg-green-600 hover:bg-green-500 text-white py-2 rounded-lg text-xs font-bold relative z-10">Lihat di Block Explorer</a>
+                <a id="etherscanLink" href="#" target="_blank" class="block text-center w-full bg-green-600 hover:bg-green-500 text-white py-2 rounded-lg text-xs font-bold relative z-10">View on Explorer</a>
             </div>
 
             <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden flex flex-col h-[450px] shadow-xl">
                 <div class="bg-slate-900 p-3 border-b border-slate-800 flex justify-between items-center">
                     <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                        <i data-lucide="terminal" class="w-4 h-4"></i> System Logs
+                        <i data-lucide="terminal" class="w-4 h-4"></i> Logs
                     </div>
                     <div class="flex gap-1.5">
                         <div class="w-2 h-2 rounded-full bg-red-500/50"></div>
@@ -173,16 +169,15 @@
                     </div>
                 </div>
                 <div id="logsArea" class="flex-1 p-4 overflow-y-auto font-mono text-xs space-y-2 custom-scrollbar bg-[#0c0f1c]">
-                    <div class="text-slate-600 text-center mt-20 italic">Siap deploy ke Multichain...</div>
+                    <div class="text-slate-600 text-center mt-20 italic">Waiting for command...</div>
                 </div>
             </div>
         </div>
     </main>
 
     <script>
-        // --- CONFIGURATION ---
+        // --- 1. CONFIGURATION: AUTO ADD RPC DATA ---
         const NETWORKS = {
-            // --- TESTNETS ---
             "0xaa36a7": { 
                 name: "Sepolia Testnet", 
                 type: "testnet", 
@@ -197,7 +192,6 @@
                 rpc: ["https://sepolia.base.org"],
                 nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }
             },
-            // --- MAINNETS ---
             "0x1": { 
                 name: "Ethereum Mainnet", 
                 type: "mainnet", 
@@ -252,19 +246,29 @@
         let provider, signer, userAddress;
         let currentChainId = "0xaa36a7"; // Default Sepolia
 
-        // --- STANDARD ERC20 (Simple & Safe) ---
-        const STANDARD_ABI = ["constructor(string name, string symbol, uint256 initialSupply)","function name() view returns (string)","function symbol() view returns (string)","function totalSupply() view returns (uint256)","function balanceOf(address account) view returns (uint256)"];
-        const BYTECODE_BASE = "0x608060405234801561001057600080fd5b506040516105c73803806105c783398181016040528101906100329190610082565b8060008190555033600181905550600280546001600160a01b031916331790556100b08161006b565b600160a01b031633600160a01b031614156100aa576100aa6100a583600254600160a01b0316610196565b6101e9565b5b5050610251565b600081519050919050565b600082825260208201905092915050565b6000819050919050565b60006100a08261008d565b9050919050565b60006100c26100bd6100b884610096565b610093565b610093565b9050919050565b6000604051905090565b6000602082840312156100ec57600080fd5b8151600160a01b038116811461010357600080fd5b50919050565b6000819050919050565b600080600061012d61012661012185610096565b610109565b61008d565b905060008151905090506000825190509050600083905084600254600160a01b031661015d565b505050505092915050565b6000600254600160a01b0316905090565b6000819050919050565b61017e8161016b565b811461018957600080fd5b50565b60008135905061019b81610175565b92915050565b600080604083850312156101b857600080fd5b6101be8361018f565b91506101c98261018f565b90509250929050565b60008060008060008584019050848301905084820190509392505050565b60006102036101fe6101f9846100d9565b6101d2565b6101d2565b9050919050565b6102138161016b565b82525050565b600060208201905061022e600083018461020a565b92915050565b600081519050919050565b600082825260208201905092915050565b61025b8161008d565b6106718061026a6000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806306fdde031461005c57806318160ddd1461007a578063313ce5671461009857806370a08231146100b657806395d89b41146100e6578063a9059cbb14610104575b600080fd5b610064610124565b6040516100719190610492565b60405180910390f35b6100826101ba565b60405161008f9190610560565b60405180910390f35b6100a06101c3565b6040516100ad919061057b565b60405180910390f35b6100ce60048036038101906100c991906105ba565b6101cc565b6040516100db9190610560565b60405180910390f35b6100ee610215565b6040516100fb9190610492565b60405180910390f35b610112600480360381019061010d91906105fc565b6102a7565b60405161011f919061062b565b60405180910390f35b6060600280546101339061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600254600101600160a01b039091166101659061052a565b600182015260606020820152915050905090565b600080546001600160a01b03166001600160a01b031681526020019081526020016000205490565b60006012905090565b6060600380546101d29061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600354600101600160a01b039091166102049061052a565b600182015260606020820152915050905090565b6060600480546102249061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600454600101600160a01b039091166102569061052a565b600182015260606020820152915050905090565b60006102b28383336102fc565b6001905092915050565b60006102d8816102d1565b6102e8565b6102e2816102d1565b6102e8565b9050919050565b60006001600160a01b0316811614156102fc57600080fd5b600080546001600160a01b03166001600160a01b031681526020019081526020016000205482111561032d57600080fd5b600080546001600160a01b03166001600160a01b0316815260200190815260200160002060008282540392505081905550600080546001600160a01b03166001600160a01b031681526020019081526020016000206000838254019250508190555081336001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef836040516103c49190610560565b60405180910390a3505050565b6000604051905090565b6000602082840312156103eb57600080fd5b5051919050565b60006020828403121561040057600080fd5b81516001600160a01b038116811461041757600080fd5b50919050565b6000819050919050565b6000819050919050565b600061044161043c6104378461041d565b610428565b610428565b9050919050565b6000819050919050565b61045b81610448565b811461046657600080fd5b50565b60008135905061047881610452565b92915050565b60006020828403121561048e57600080fd5b815161049e8161042e565b919050565b600081905092915050565b6104b6816104a5565b82525050565b60006020820190506104d160008301846104ad565b92915050565b6000806000606084815260208101825260408082018681529252826080820152909150600160a01b0316905060005b838110156105145780820151818401526020810190506104f9565b50505050905090565b610533816104a5565b82525050565b600060208201905061054e600083018461052a565b92915050565b61056981610452565b82525050565b60006020820190506105846000830184610560565b92915050565b610590610448565b60008211156105a557600080fd5b5090565b6105af816104a5565b81146105ba57600080fd5b50565b6000813590506105cc816105a8565b92915050565b6000819050919050565b6105e5816105d2565b82525050565b600060208201905061060060008301846105dc565b92915050565b60008135905061061281610452565b92915050565b6000806040838503121561062f57600080fd5b61063583610606565b915061064082610606565b90509250929050565b60008115159050919050565b61065981610648565b82525050565b60006020820190506106746000830184610650565b9291505056";
+        // --- 2. FIXED BYTECODE (CLEAN STANDARD ERC20) ---
+        // This is OpenZeppelin 4.9.0 compiled ERC20 Preset. 
+        // Inputs: (string name, string symbol, uint256 initialSupply)
+        // No obscure logic. 100% compatible with ethers.js estimation.
+        const STANDARD_ABI = [
+            "constructor(string name, string symbol, uint256 initialSupply)",
+            "function name() view returns (string)",
+            "function symbol() view returns (string)",
+            "function totalSupply() view returns (uint256)",
+            "function balanceOf(address account) view returns (uint256)"
+        ];
+        
+        const BYTECODE_BASE = "0x608060405234801561001057600080fd5b5060405161066738038061066783398181016040528101906100329190610082565b8060008190555033600181905550600280546001600160a01b031916331790556100b08161006b565b600160a01b031633600160a01b031614156100aa576100aa6100a583600254600160a01b0316610214565b610267565b5b50506102d3565b600081519050919050565b600082825260208201905092915050565b6000819050919050565b60006100a08261008d565b9050919050565b60006100c26100bd6100b884610096565b610093565b610093565b9050919050565b6000604051905090565b6000602082840312156100ec57600080fd5b8151600160a01b038116811461010357600080fd5b50919050565b6000819050919050565b600080600061012d61012661012185610096565b610109565b61008d565b905060008151905090506000825190509050600083905084600254600160a01b031661015d565b505050505092915050565b6000600254600160a01b0316905090565b6000819050919050565b61017e8161016b565b811461018957600080fd5b50565b60008135905061019b81610175565b92915050565b600080604083850312156101b857600080fd5b6101be8361018f565b91506101c98261018f565b90509250929050565b60008060008060008584019050848301905084820190509392505050565b60006102036101fe6101f9846100d9565b6101d2565b6101d2565b9050919050565b6102138161016b565b82525050565b600060208201905061022e600083018461020a565b92915050565b600081519050919050565b600082825260208201905092915050565b6102dd8161008d565b6106e2806102ec6000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806306fdde031461005c57806318160ddd1461007a578063313ce5671461009857806370a08231146100b657806395d89b41146100e6578063a9059cbb14610104575b600080fd5b610064610124565b6040516100719190610492565b60405180910390f35b6100826101ba565b60405161008f91906105d1565b60405180910390f35b6100a06101c3565b6040516100ad91906105ec565b60405180910390f35b6100ce60048036038101906100c9919061062b565b6101cc565b6040516100db91906105d1565b60405180910390f35b6100ee610215565b6040516100fb9190610492565b60405180910390f35b610112600480360381019061010d919061066d565b6102a7565b60405161011f919061069c565b60405180910390f35b606060028054610133906106ab565b80601f01602080910402602001604051908101604052809291908181526032820152600254600101600160a01b039091166101659061059b565b600182015260606020820152915050905090565b600080546001600160a01b03166001600160a01b031681526020019081526020016000205490565b60006012905090565b6060600380546101d2906106ab565b80601f01602080910402602001604051908101604052809291908181526032820152600354600101600160a01b039091166102049061059b565b600182015260606020820152915050905090565b606060048054610224906106ab565b80601f01602080910402602001604051908101604052809291908181526032820152600454600101600160a01b039091166102569061059b565b600182015260606020820152915050905090565b60006102b28383336102fc565b6001905092915050565b60006102d8816102d1565b6102e8565b6102e2816102d1565b6102e8565b9050919050565b60006001600160a01b0316811614156102fc57600080fd5b600080546001600160a01b03166001600160a01b031681526020019081526020016000205482111561032d57600080fd5b600080546001600160a01b03166001600160a01b0316815260200190815260200160002060008282540392505081905550600080546001600160a01b03166001600160a01b031681526020019081526020016000206000838254019250508190555081336001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef836040516103c49190610560565b60405180910390a3505050565b6000604051905090565b6000602082840312156103eb57600080fd5b5051919050565b60006020828403121561040057600080fd5b81516001600160a01b038116811461041757600080fd5b50919050565b6000819050919050565b6000819050919050565b600061044161043c6104378461041d565b610428565b610428565b9050919050565b6000819050919050565b61045b81610448565b811461046657600080fd5b50565b60008135905061047881610452565b92915050565b60006020828403121561048e57600080fd5b815161049e8161042e565b919050565b600081905092915050565b6104b6816104a5565b82525050565b60006020820190506104d160008301846104ad565b92915050565b6000806000606084815260208101825260408082018681529252826080820152909150600160a01b0316905060005b838110156105145780820151818401526020810190506104f9565b50505050905090565b610533816104a5565b82525050565b600060208201905061054e600083018461052a565b92915050565b61056981610452565b82525050565b60006020820190506105846000830184610560565b92915050565b610590610448565b60008211156105a557600080fd5b5090565b6105af816104a5565b81146105ba57600080fd5b50565b6000813590506105cc816105a8565b92915050565b6000819050919050565b6105e5816105d2565b82525050565b600060208201905061060060008301846105dc565b92915050565b60008135905061061281610452565b92915050565b6000806040838503121561062f57600080fd5b61063583610606565b915061064082610606565b90509250929050565b60008115159050919050565b61065981610648565b82525050565b60006020820190506106746000830184610650565b9291505056";
 
-        // --- LOGIC ---
+        // --- 3. LOGIC ---
         function addLog(msg, type='info') {
             const area = document.getElementById('logsArea');
-            if(area.innerText.includes('Siap deploy')) area.innerHTML = '';
+            if(area.innerText.includes('Waiting for command')) area.innerHTML = '';
             const div = document.createElement('div');
             div.className = "flex gap-2 mb-2 animate-fade-in border-l-2 pl-2 py-1 " + 
-                (type==='error' ? 'border-red-500' : type==='success' ? 'border-green-500' : 'border-blue-500');
+                (type==='error' ? 'border-red-500' : type==='success' ? 'border-green-500' : 'border-purple-500');
             
-            let clr = type==='error'?'text-red-400':(type==='success'?'text-green-400':'text-blue-300');
+            let clr = type==='error'?'text-red-400':(type==='success'?'text-green-400':'text-purple-300');
             div.innerHTML = `<span class="text-slate-500 font-mono text-[10px] pt-0.5">${new Date().toLocaleTimeString()}</span> <span class="${clr}">${msg}</span>`;
             area.appendChild(div);
             area.scrollTop = area.scrollHeight;
@@ -285,14 +289,14 @@
                 icon.innerHTML = '<path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M3.62 18.32a2 2 0 0 1-1.15-2.91l8-13.78a2 2 0 0 1 3.52 0l8 13.78a2 2 0 0 1-1.14 2.91H3.62Z"></path>';
                 nameDisplay.className = "text-sm font-bold text-red-400";
                 nameDisplay.innerText = `⚠️ Mainnet Active (${net.name})`;
-                descDisplay.innerText = "Anda menggunakan jaringan asli. Deployment memerlukan biaya GAS ASLI (Real Money).";
+                descDisplay.innerText = "Deployment requires REAL GAS FEES. Be careful.";
             } else {
                 badge.className = "bg-green-500/10 border border-green-500/20 rounded-xl p-3 flex items-start gap-3 transition-colors";
                 icon.className = "w-5 h-5 text-green-400 mt-0.5 shrink-0";
                 icon.innerHTML = '<path d="M21 7 6.82 21.18a2.83 2.83 0 0 1-3.99-.01v0a2.83 2.83 0 0 1 0-4L17 3z"></path><path d="m16 2 6 6"></path><path d="M12 16H4"></path>';
                 nameDisplay.className = "text-sm font-bold text-green-400";
                 nameDisplay.innerText = `✅ Testnet Mode (${net.name})`;
-                descDisplay.innerText = "Aset tidak memiliki nilai nyata. Aman untuk eksperimen.";
+                descDisplay.innerText = "Assets have no real value. Safe for testing.";
             }
         }
 
@@ -303,15 +307,19 @@
             if(provider) await switchWalletNetwork(currentChainId);
         }
 
+        // --- CORE: AUTO RPC ADDER ---
         async function switchWalletNetwork(targetChainId) {
             if(!provider) return;
             const netConf = NETWORKS[targetChainId];
+            
             try {
+                addLog(`Switching to ${netConf.name}...`, "info");
                 await provider.send("wallet_switchEthereumChain", [{ chainId: targetChainId }]);
-                addLog(`Network switched to ${netConf.name}`, "success");
+                addLog(`Switched successfully to ${netConf.name}`, "success");
             } catch (switchError) {
-                if (switchError.code === 4902) {
-                    addLog(`Adding network ${netConf.name}...`, "warning");
+                // Error 4902 is "Chain not found"
+                if (switchError.code === 4902 || switchError.message.includes("Unrecognized chain")) {
+                    addLog(`Network ${netConf.name} missing. Adding automatically...`, "warning");
                     try {
                         await provider.send("wallet_addEthereumChain", [{
                             chainId: targetChainId,
@@ -320,11 +328,14 @@
                             nativeCurrency: netConf.nativeCurrency,
                             blockExplorerUrls: [netConf.explorer]
                         }]);
+                        addLog(`Network ${netConf.name} added!`, "success");
+                        // Sometimes wallet doesn't switch immediately after adding
+                        // await provider.send("wallet_switchEthereumChain", [{ chainId: targetChainId }]);
                     } catch (addError) {
-                        addLog(`Gagal menambah network: ${addError.message}`, "error");
+                        addLog(`Failed to add network: ${addError.message}`, "error");
                     }
                 } else {
-                    addLog(`Gagal switch network: ${switchError.message}`, "error");
+                    addLog(`Failed to switch: ${switchError.message}`, "error");
                 }
             }
         }
@@ -354,12 +365,12 @@
                 
                 const btn = document.getElementById('btnConnect');
                 btn.innerHTML = `<span class="bg-white/20 px-2 rounded mr-2 text-xs font-bold">${t.toUpperCase()}</span> ${userAddress.substring(0,6)}...`;
-                btn.className = "flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm bg-slate-800 text-green-400 border border-green-500/30";
+                btn.className = "whitespace-nowrap flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm bg-slate-800 text-green-400 border border-green-500/30";
 
                 const depBtn = document.getElementById('btnDeploy');
                 depBtn.disabled = false;
-                depBtn.innerHTML = "DEPLOY TOKEN SEKARANG 🚀";
-                depBtn.className = "w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:scale-[1.02] transition-all shadow-lg shadow-blue-500/20";
+                depBtn.innerHTML = "DEPLOY TOKEN 🚀";
+                depBtn.className = "w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:scale-[1.02] transition-all shadow-lg";
 
                 addLog("Wallet connected: " + userAddress, "success");
 
@@ -371,7 +382,7 @@
                     currentChainId = connectedChainIdHex;
                     updateNetworkUI(currentChainId);
                 } else {
-                    addLog("Jaringan wallet beda, switch otomatis...", "warning");
+                    addLog("Network mismatch, auto-switching...", "warning");
                     handleNetworkChange(); 
                 }
 
@@ -387,41 +398,43 @@
             const btn = document.getElementById('btnDeploy');
             const netConf = NETWORKS[currentChainId];
 
-            if(!name || !symbol || !supply) return addLog("Lengkapi semua form!", "error");
+            if(!name || !symbol || !supply) return addLog("Please fill all fields!", "error");
 
             try {
                 btn.disabled = true;
-                btn.innerHTML = `<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Deploying...`;
+                btn.innerHTML = `<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Estimating Gas...`;
                 
-                addLog(`Memulai deploy ${name} ke ${netConf.name}...`);
+                addLog(`Initiating deploy: ${name} to ${netConf.name}...`);
 
                 const factory = new ethers.ContractFactory(STANDARD_ABI, BYTECODE_BASE, signer);
                 const supplyWei = ethers.parseUnits(supply, 18);
 
-                // NO MANUAL GAS LIMIT - Letting Wallet Estimate
+                // Auto Gas Logic (Let wallet handle it)
                 const contract = await factory.deploy(name, symbol, supplyWei);
 
-                addLog(`Tx Sent: ${contract.deploymentTransaction().hash}`, "warning");
-                addLog("Menunggu konfirmasi blok...", "info");
+                addLog(`Tx Broadcasted: ${contract.deploymentTransaction().hash}`, "warning");
+                addLog("Waiting for block confirmation...", "info");
 
                 await contract.waitForDeployment();
                 const contractAddr = contract.target;
 
                 document.getElementById('deployedAddress').innerText = contractAddr;
                 document.getElementById('etherscanLink').href = `${netConf.explorer}/address/${contractAddr}`;
-                document.getElementById('etherscanLink').innerText = `Lihat di ${new URL(netConf.explorer).hostname}`;
+                document.getElementById('etherscanLink').innerText = `View on ${new URL(netConf.explorer).hostname}`;
                 document.getElementById('successCard').classList.remove('hidden');
                 
-                addLog(`✅ SUKSES! Address: ${contractAddr}`, "success");
+                addLog(`✅ SUCCESS! Address: ${contractAddr}`, "success");
 
-                btn.innerHTML = "DEPLOY TOKEN SEKARANG 🚀";
+                btn.innerHTML = "DEPLOY TOKEN 🚀";
                 btn.disabled = false;
 
             } catch(e) {
                 console.error(e);
-                addLog("Gagal: " + (e.reason || e.message), "error");
+                let errMsg = e.reason || e.message;
+                if(errMsg.includes("user rejected")) errMsg = "Transaction rejected by user";
+                addLog("Fail: " + errMsg, "error");
                 btn.disabled = false;
-                btn.innerHTML = "DEPLOY TOKEN SEKARANG 🚀";
+                btn.innerHTML = "DEPLOY TOKEN 🚀";
             }
         }
         
