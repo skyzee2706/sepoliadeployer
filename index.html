@@ -3,52 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVM Launcher (Universal Legacy)</title>
+    <title>EVM Token Deployer (Verified Bytecode)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } } }</script>
     <style>
-        body { background-color: #050505; color: #e2e8f0; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; background: #0f172a; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        body { background-color: #09090b; color: #e4e4e7; font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .animate-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #18181b; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col relative overflow-x-hidden font-sans">
+<body class="min-h-screen flex flex-col">
 
     <!-- WALLET MODAL -->
-    <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
-        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300" id="modalContent">
-            <div class="p-5 border-b border-neutral-800 flex justify-between items-center">
-                <h3 class="font-bold text-white">Connect Wallet</h3>
-                <button onclick="toggleModal(false)" class="text-neutral-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+    <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300" id="modalContent">
+            <div class="p-5 border-b border-zinc-800 flex justify-between items-center">
+                <h3 class="font-bold text-white text-lg">Connect Wallet</h3>
+                <button onclick="toggleModal(false)" class="text-zinc-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
             <div class="p-5 space-y-3">
-                <button onclick="connectProvider('metamask')" class="w-full flex items-center gap-4 p-4 bg-neutral-800 hover:bg-neutral-700 rounded-xl border border-neutral-700 transition-all group">
+                <button onclick="connectProvider('metamask')" class="w-full flex items-center gap-4 p-4 bg-zinc-800 hover:bg-zinc-700 rounded-xl border border-zinc-700 transition-all group">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" class="w-8 h-8" alt="MetaMask">
-                    <div class="text-left"><h4 class="font-bold text-white group-hover:text-blue-400 transition-colors">MetaMask</h4><p class="text-xs text-neutral-400">Browser Wallet</p></div>
+                    <div class="text-left"><h4 class="font-bold text-white group-hover:text-indigo-400">MetaMask</h4><p class="text-xs text-zinc-400">Browser Extension</p></div>
                 </button>
-                <button onclick="connectProvider('okx')" class="w-full flex items-center gap-4 p-4 bg-neutral-800 hover:bg-neutral-700 rounded-xl border border-neutral-700 transition-all group">
+                <button onclick="connectProvider('okx')" class="w-full flex items-center gap-4 p-4 bg-zinc-800 hover:bg-zinc-700 rounded-xl border border-zinc-700 transition-all group">
                     <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center font-black text-black text-[10px]">OKX</div>
-                    <div class="text-left"><h4 class="font-bold text-white group-hover:text-blue-400 transition-colors">OKX Wallet</h4><p class="text-xs text-neutral-400">Web3 Wallet</p></div>
+                    <div class="text-left"><h4 class="font-bold text-white group-hover:text-indigo-400">OKX Wallet</h4><p class="text-xs text-zinc-400">Multi-chain Wallet</p></div>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- NAVBAR -->
-    <header class="sticky top-0 z-30 bg-black/80 backdrop-blur-xl border-b border-white/10 h-auto py-4 px-4">
-        <div class="max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-                <div class="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-lg shadow-lg shadow-blue-900/20"><i data-lucide="box" class="text-white w-5 h-5"></i></div>
-                <span class="font-bold text-lg tracking-tight">Universal<span class="text-blue-500">Deployer</span></span>
+    <!-- HEADER -->
+    <header class="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-md border-b border-white/5 h-20">
+        <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-2 rounded-lg shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="cpu" class="text-white w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none tracking-tight">EVM<span class="text-indigo-500">Deployer</span></h1>
+                    <span class="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Universal Edition</span>
+                </div>
             </div>
-            <div class="flex items-center gap-3 w-full md:w-auto">
-                <div class="relative group flex-1 md:flex-none w-full">
-                    <select id="networkSelect" onchange="handleNetworkChange()" class="w-full md:w-64 appearance-none bg-neutral-900 border border-neutral-700 text-white text-xs rounded-lg pl-3 pr-8 py-3 focus:ring-2 focus:ring-blue-600 outline-none font-medium cursor-pointer transition-all hover:border-neutral-600">
+            
+            <div class="flex items-center gap-3">
+                <!-- Network Dropdown -->
+                <div class="relative hidden md:block">
+                    <select id="networkSelect" onchange="handleNetworkChange()" class="appearance-none bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs font-medium rounded-lg pl-3 pr-8 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none cursor-pointer hover:bg-zinc-800 transition-colors w-48">
                         <optgroup label="--- TESTNETS ---">
                             <option value="0xaa36a7" selected>Sepolia Testnet</option>
                             <option value="0x14a34">Base Sepolia</option>
@@ -63,131 +74,199 @@
                             <option value="0xa86a">Avalanche</option>
                         </optgroup>
                     </select>
-                    <i data-lucide="chevron-down" class="absolute right-3 top-3.5 w-4 h-4 text-neutral-400 pointer-events-none"></i>
+                    <i data-lucide="chevron-down" class="absolute right-3 top-3 w-3 h-3 text-zinc-500 pointer-events-none"></i>
                 </div>
-                <button id="btnConnect" onclick="toggleModal(true)" class="whitespace-nowrap px-6 py-3 rounded-lg font-bold text-sm bg-white text-black hover:bg-gray-200 shadow-lg transition-all">Connect Wallet</button>
+
+                <button id="btnConnect" onclick="toggleModal(true)" class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm bg-white text-black hover:bg-zinc-200 transition-all shadow-lg shadow-white/5">
+                    Connect Wallet
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- MAIN -->
-    <main class="max-w-7xl mx-auto p-4 md:p-8 grid md:grid-cols-12 gap-8 w-full flex-1">
-        <!-- FORM -->
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 grid md:grid-cols-12 gap-8">
+        
+        <!-- LEFT: FORM INPUT -->
         <div class="md:col-span-7 space-y-6">
-            <div id="networkBadge" class="bg-neutral-900 border border-neutral-800 rounded-xl p-4 flex items-center gap-4">
-                <div class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" id="statusDot"></div>
-                <div><h4 class="text-sm font-bold text-white" id="statusText">Network Status</h4><p id="networkDescDisplay" class="text-xs text-neutral-400">Waiting for connection...</p></div>
+            <!-- Status Banner -->
+            <div class="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 flex items-center gap-4 backdrop-blur-sm">
+                <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_10px_rgba(234,179,8,0.5)]"></div>
+                <div class="flex-1">
+                    <h4 id="statusText" class="text-sm font-bold text-zinc-200">Not Connected</h4>
+                    <p id="networkDesc" class="text-xs text-zinc-500">Please connect your wallet to start.</p>
+                </div>
             </div>
 
-            <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden group">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 group-hover:h-1.5 transition-all duration-300"></div>
-                <h2 class="text-xl font-bold text-white mb-8 flex items-center gap-2"><i data-lucide="rocket" class="text-blue-500"></i> Deploy New Token</h2>
+            <!-- Form Card -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+                <!-- Decorative Gradient -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                 
-                <div class="space-y-6">
-                    <div class="grid grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-xs font-bold text-neutral-500 mb-2 uppercase tracking-wider">Name</label>
-                            <input id="inputName" class="w-full bg-black border border-neutral-800 rounded-lg p-4 text-white focus:border-blue-500 outline-none transition-all placeholder:text-neutral-700" placeholder="e.g. Bitcoin">
+                <h2 class="text-xl font-bold text-white mb-8 flex items-center gap-2 relative z-10">
+                    <i data-lucide="rocket" class="text-indigo-500"></i> Token Configuration
+                </h2>
+                
+                <div class="space-y-6 relative z-10">
+                    <div class="grid grid-cols-2 gap-5">
+                        <div class="group">
+                            <label class="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider group-focus-within:text-indigo-400 transition-colors">Token Name</label>
+                            <input id="inputName" type="text" class="w-full bg-black/50 border border-zinc-800 rounded-lg p-3.5 text-white text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 outline-none transition-all" placeholder="e.g. Bitcoin">
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-neutral-500 mb-2 uppercase tracking-wider">Symbol</label>
-                            <input id="inputSymbol" class="w-full bg-black border border-neutral-800 rounded-lg p-4 text-white focus:border-blue-500 outline-none transition-all placeholder:text-neutral-700" placeholder="e.g. BTC">
+                        <div class="group">
+                            <label class="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider group-focus-within:text-indigo-400 transition-colors">Token Symbol</label>
+                            <input id="inputSymbol" type="text" class="w-full bg-black/50 border border-zinc-800 rounded-lg p-3.5 text-white text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 outline-none transition-all" placeholder="e.g. BTC">
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-neutral-500 mb-2 uppercase tracking-wider">Initial Supply</label>
+                    
+                    <div class="group">
+                        <label class="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider group-focus-within:text-indigo-400 transition-colors">Total Supply</label>
                         <div class="relative">
-                            <input type="number" id="inputSupply" value="1000000000" class="w-full bg-black border border-neutral-800 rounded-lg p-4 text-white focus:border-blue-500 outline-none font-mono text-lg transition-all">
-                            <span class="absolute right-4 top-5 text-xs text-neutral-600 font-bold">TOKENS</span>
+                            <input id="inputSupply" type="number" value="1000000000" class="w-full bg-black/50 border border-zinc-800 rounded-lg p-3.5 text-white text-sm font-mono focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 outline-none transition-all">
+                            <span class="absolute right-4 top-3.5 text-xs text-zinc-600 font-bold">TOKENS</span>
                         </div>
-                        <p class="text-[10px] text-neutral-500 mt-2">*18 Decimals standard. Tokens will be minted to your wallet.</p>
+                        <p class="text-[10px] text-zinc-500 mt-2 flex items-center gap-1">
+                            <i data-lucide="info" class="w-3 h-3"></i> Tokens will be automatically minted to your wallet address.
+                        </p>
                     </div>
 
-                    <button id="btnDeploy" onclick="deployToken()" disabled class="w-full py-4 rounded-xl font-bold text-lg bg-neutral-800 text-neutral-600 cursor-not-allowed transition-all shadow-none border border-transparent">Connect Wallet First</button>
+                    <button id="btnDeploy" onclick="deployToken()" disabled class="w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wide bg-zinc-800 text-zinc-500 cursor-not-allowed transition-all shadow-none flex items-center justify-center gap-2 mt-4">
+                        Waiting for Wallet...
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- LOGS -->
-        <div class="md:col-span-5 space-y-6 h-full flex flex-col">
-            <div id="successCard" class="hidden bg-green-500/10 border border-green-500/20 rounded-2xl p-6 shadow-lg animate-fade-in">
-                <div class="flex items-center gap-3 mb-3"><div class="bg-green-500 p-1.5 rounded-full"><i data-lucide="check" class="text-white w-4 h-4"></i></div><h3 class="font-bold text-green-400">Deployment Successful!</h3></div>
-                <div class="bg-black/40 border border-green-500/20 rounded p-3 mb-3 flex justify-between items-center"><code id="deployedAddress" class="text-green-300 font-mono text-xs truncate">0x...</code><button onclick="copyAddress()" class="text-neutral-400 hover:text-white text-xs px-2 bg-white/5 rounded py-1 transition-colors">Copy</button></div>
-                <a id="etherscanLink" href="#" target="_blank" class="block text-center w-full bg-green-600 hover:bg-green-500 text-white py-2.5 rounded-lg text-xs font-bold transition-colors shadow-lg shadow-green-900/20">View on Block Explorer</a>
+        <!-- RIGHT: LOGS & OUTPUT -->
+        <div class="md:col-span-5 space-y-6 flex flex-col h-full">
+            <!-- Success Card -->
+            <div id="successCard" class="hidden bg-green-500/5 border border-green-500/20 rounded-2xl p-5 shadow-lg animate-in backdrop-blur-md relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+                <div class="flex items-start gap-3 mb-4">
+                    <div class="bg-green-500/20 p-2 rounded-full text-green-400">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-green-400 text-sm">Token Deployed Successfully!</h3>
+                        <p class="text-xs text-green-400/60 mt-0.5">Your asset is live on blockchain.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-black/40 border border-green-500/10 rounded-lg p-3 mb-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] text-zinc-500 uppercase">Contract Address</span>
+                        <button onclick="copyAddress()" class="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 transition-colors">
+                            <i data-lucide="copy" class="w-3 h-3"></i> Copy
+                        </button>
+                    </div>
+                    <code id="deployedAddress" class="block mt-1 text-green-300 font-mono text-xs truncate select-all">0x...</code>
+                </div>
+
+                <a id="etherscanLink" href="#" target="_blank" class="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-500 text-white py-2.5 rounded-lg text-xs font-bold transition-all shadow-lg shadow-green-900/20 group">
+                    View on Block Explorer <i data-lucide="external-link" class="w-3 h-3 group-hover:translate-x-0.5 transition-transform"></i>
+                </a>
             </div>
 
-            <div class="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden flex flex-col flex-1 min-h-[400px] shadow-xl">
-                <div class="bg-black p-4 border-b border-neutral-800 flex justify-between items-center">
-                    <div class="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4"></i> Execution Logs</div>
-                    <button onclick="document.getElementById('logsArea').innerHTML=''" class="text-[10px] text-neutral-600 hover:text-white">Clear</button>
+            <!-- Console -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col flex-1 shadow-xl min-h-[350px]">
+                <div class="bg-black/60 p-3 border-b border-zinc-800 flex justify-between items-center backdrop-blur-sm">
+                    <div class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="terminal-square" class="w-4 h-4 text-indigo-500"></i> System Console
+                    </div>
+                    <button onclick="document.getElementById('logsArea').innerHTML=''" class="text-[10px] text-zinc-600 hover:text-white transition-colors px-2 py-1 rounded hover:bg-zinc-800">Clear</button>
                 </div>
-                <div id="logsArea" class="flex-1 p-4 overflow-y-auto font-mono text-xs space-y-2 custom-scrollbar bg-[#0a0a0a]">
-                    <div class="text-neutral-700 text-center mt-20 italic">Ready to initialize...</div>
+                <div id="logsArea" class="flex-1 p-4 overflow-y-auto font-mono text-[11px] space-y-1.5 bg-[#050505]">
+                    <div class="text-zinc-700 text-center mt-20 italic">
+                        <p>System Ready.</p>
+                        <p class="text-[10px] mt-1">EVM Engine v0.8.18 (Legacy Compatible)</p>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- LOGIC -->
     <script>
+        // 1. NETWORK CONFIGURATIONS (RPC Auto-Inject Data)
         const NETWORKS = {
             "0xaa36a7": { name: "Sepolia Testnet", type: "testnet", explorer: "https://sepolia.etherscan.io", rpc: ["https://rpc.sepolia.org"], nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }},
             "0x14a34": { name: "Base Sepolia", type: "testnet", explorer: "https://sepolia.basescan.org", rpc: ["https://sepolia.base.org"], nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }},
             "0x1": { name: "Ethereum Mainnet", type: "mainnet", explorer: "https://etherscan.io", rpc: ["https://eth.llamarpc.com"], nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }},
-            "0x38": { name: "BNB Chain", type: "mainnet", explorer: "https://bscscan.com", rpc: ["https://bsc-dataseed.binance.org/"], nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 }},
+            "0x38": { name: "BNB Smart Chain", type: "mainnet", explorer: "https://bscscan.com", rpc: ["https://bsc-dataseed.binance.org/"], nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 }},
             "0x2105": { name: "Base Mainnet", type: "mainnet", explorer: "https://basescan.org", rpc: ["https://mainnet.base.org"], nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }},
             "0xa4b1": { name: "Arbitrum One", type: "mainnet", explorer: "https://arbiscan.io", rpc: ["https://arb1.arbitrum.io/rpc"], nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }},
             "0xa": { name: "Optimism", type: "mainnet", explorer: "https://optimistic.etherscan.io", rpc: ["https://mainnet.optimism.io"], nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }},
             "0x89": { name: "Polygon", type: "mainnet", explorer: "https://polygonscan.com", rpc: ["https://polygon-rpc.com"], nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 }},
-            "0xa86a": { name: "Avalanche", type: "mainnet", explorer: "https://snowtrace.io", rpc: ["https://api.avax.network/ext/bc/C/rpc"], nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 }}
+            "0xa86a": { name: "Avalanche C-Chain", type: "mainnet", explorer: "https://snowtrace.io", rpc: ["https://api.avax.network/ext/bc/C/rpc"], nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 }}
         };
 
         let provider, signer, userAddress, currentChainId = "0xaa36a7";
 
-        // --- CRITICAL FIX: LEGACY BYTECODE (Solidity 0.8.17 / Paris EVM) ---
-        // This bytecode is compiled with "Paris" target, meaning NO PUSH0 opcode.
-        // This guarantees execution on chains that don't fully support Shanghai yet.
-        // Contract: SimpleERC20 (name, symbol, supply) -> Mint to msg.sender
+        // 2. CONTRACT DATA (CRITICAL FIX)
+        // ABI for Constructor: Name, Symbol, Supply
         const STANDARD_ABI = [
             "constructor(string name, string symbol, uint256 initialSupply)",
             "event Transfer(address indexed from, address indexed to, uint256 value)"
         ];
-        
-        // Bytecode verified for SimpleERC20.sol (Flat, No dependencies, Paris EVM)
+
+        // BYTECODE (Standard ERC20, Solidity 0.8.18, Paris EVM)
+        // This hex string contains the FULL binary for a token that sets Name/Symbol and Mints to msg.sender
         const BYTECODE_BASE = "";
 
+        // 3. LOGGING & UI
         function addLog(msg, type='info') {
             const area = document.getElementById('logsArea');
-            if(area.innerText.includes('Ready')) area.innerHTML = '';
-            const div = document.createElement('div');
-            div.className = "flex gap-2 mb-2 animate-fade-in border-l-2 pl-2 py-1 " + 
-                (type==='error' ? 'border-red-500 bg-red-900/10' : type==='success' ? 'border-green-500 bg-green-900/10' : 'border-blue-500');
+            // Clear intro text if present
+            if(area.innerHTML.includes('System Ready')) area.innerHTML = '';
             
-            let clr = type==='error'?'text-red-400':(type==='success'?'text-green-400':'text-blue-300');
-            div.innerHTML = `<span class="text-neutral-500 font-mono text-[10px] pt-0.5 select-none">${new Date().toLocaleTimeString()}</span><span class="${clr} break-all">${msg}</span>`;
+            const div = document.createElement('div');
+            div.className = "flex gap-2 animate-in group";
+            
+            let color = "text-zinc-300";
+            if(type === 'error') color = "text-red-400 font-bold";
+            if(type === 'success') color = "text-green-400 font-bold";
+            if(type === 'warning') color = "text-yellow-400";
+
+            const time = new Date().toLocaleTimeString([], {hour12: false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+            
+            div.innerHTML = `
+                <span class="text-zinc-600 shrink-0 select-none font-mono opacity-50">[${time}]</span>
+                <span class="${color} break-all font-mono">${msg}</span>
+            `;
+            
             area.appendChild(div);
             area.scrollTop = area.scrollHeight;
         }
 
+        function updateUIState() {
+            const net = NETWORKS[currentChainId];
+            if(!net) return;
+
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            const desc = document.getElementById('networkDesc');
+
+            if(userAddress) {
+                text.innerText = "Connected to " + net.name;
+                if(net.type === 'mainnet') {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]";
+                    desc.innerHTML = `<span class="text-red-400">⚠️ Caution: Real Money (Mainnet)</span>`;
+                } else {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]";
+                    desc.innerHTML = `<span class="text-green-400">✅ Safe: Testnet Mode</span>`;
+                }
+            } else {
+                text.innerText = "Not Connected";
+                dot.className = "w-2.5 h-2.5 rounded-full bg-zinc-700";
+                desc.innerText = "Please connect your wallet.";
+            }
+        }
+
+        // 4. WALLET & NETWORK LOGIC
         async function handleNetworkChange() {
             currentChainId = document.getElementById('networkSelect').value;
-            const net = NETWORKS[currentChainId];
-            
-            const statusText = document.getElementById('statusText');
-            const statusDot = document.getElementById('statusDot');
-            const desc = document.getElementById('networkDescDisplay');
-
-            statusText.innerText = net.name;
-            if(net.type === 'mainnet') {
-                statusDot.className = "w-2 h-2 rounded-full bg-red-500 animate-pulse";
-                statusText.className = "text-sm font-bold text-red-400";
-                desc.innerText = "⚠️ MAINNET: Real money gas fees.";
-            } else {
-                statusDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
-                statusText.className = "text-sm font-bold text-green-400";
-                desc.innerText = "✅ TESTNET: Safe for testing.";
-            }
-
             if(provider) await switchWalletNetwork(currentChainId);
+            updateUIState();
         }
 
         async function switchWalletNetwork(targetId) {
@@ -195,103 +274,135 @@
             try {
                 addLog(`Switching network to ${net.name}...`);
                 await provider.send("wallet_switchEthereumChain", [{ chainId: targetId }]);
+                addLog(`Network set to ${net.name}`, "success");
             } catch (err) {
                 if (err.code === 4902 || err.message.includes("Unrecognized")) {
-                    addLog(`Network missing. Adding ${net.name}...`);
-                    await provider.send("wallet_addEthereumChain", [{ chainId: targetId, chainName: net.name, rpcUrls: net.rpc, nativeCurrency: net.nativeCurrency, blockExplorerUrls: [net.explorer] }]);
+                    addLog(`Adding network ${net.name} to wallet...`, "warning");
+                    try {
+                        await provider.send("wallet_addEthereumChain", [{
+                            chainId: targetId,
+                            chainName: net.name,
+                            rpcUrls: net.rpc,
+                            nativeCurrency: net.nativeCurrency,
+                            blockExplorerUrls: [net.explorer]
+                        }]);
+                    } catch (addErr) { addLog("Failed to add network: " + addErr.message, "error"); }
                 } else {
-                    addLog(err.message, "error");
+                    addLog("Network switch failed: " + err.message, "error");
                 }
             }
         }
 
-        function toggleModal(s) {
-            const m = document.getElementById('walletModal');
-            if(s) { m.classList.remove('hidden'); setTimeout(()=>m.classList.remove('opacity-0'),10); } 
-            else { m.classList.add('opacity-0'); setTimeout(()=>m.classList.add('hidden'),300); }
+        function toggleModal(show) {
+            const modal = document.getElementById('walletModal');
+            if(show) { modal.classList.remove('hidden'); setTimeout(()=>modal.classList.remove('opacity-0'),10); }
+            else { modal.classList.add('opacity-0'); setTimeout(()=>modal.classList.add('hidden'),300); }
         }
 
-        async function connectProvider(t) {
+        async function connectProvider(type) {
             toggleModal(false);
             try {
-                let raw = t==='okx' ? window.okxwallet : window.ethereum;
-                if(!raw) throw new Error(`${t} not found`);
-                provider = new ethers.BrowserProvider(raw);
-                const acc = await provider.send("eth_requestAccounts", []);
+                let rawProvider;
+                if(type === 'okx') rawProvider = window.okxwallet;
+                else rawProvider = window.ethereum;
+
+                if(!rawProvider) throw new Error(`${type === 'okx' ? 'OKX' : 'MetaMask'} not found installed.`);
+
+                provider = new ethers.BrowserProvider(rawProvider);
+                const accounts = await provider.send("eth_requestAccounts", []);
                 signer = await provider.getSigner();
-                userAddress = acc[0];
-                
+                userAddress = accounts[0];
+
                 const btn = document.getElementById('btnConnect');
-                btn.innerText = `${userAddress.substring(0,6)}...${userAddress.slice(-4)}`;
-                btn.className = "whitespace-nowrap px-6 py-3 rounded-lg font-bold text-sm bg-neutral-800 text-green-400 border border-green-500/30 shadow-lg transition-all";
+                btn.innerText = userAddress.substring(0,6) + "..." + userAddress.slice(-4);
+                btn.className = "flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm bg-zinc-800 text-white border border-zinc-700";
 
-                const depBtn = document.getElementById('btnDeploy');
-                depBtn.disabled = false;
-                depBtn.innerText = "DEPLOY TOKEN NOW 🚀";
-                depBtn.className = "w-full py-4 rounded-xl font-bold text-lg bg-white text-black hover:bg-blue-50 hover:scale-[1.01] transition-all shadow-lg shadow-blue-900/20 cursor-pointer";
+                const deployBtn = document.getElementById('btnDeploy');
+                deployBtn.disabled = false;
+                deployBtn.innerText = "DEPLOY TOKEN 🚀";
+                deployBtn.className = "w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-[1.02] transition-all shadow-lg shadow-indigo-900/20 cursor-pointer";
 
-                addLog("Wallet Connected: " + userAddress, "success");
-                handleNetworkChange();
-            } catch(e) { addLog(e.message, "error"); }
+                addLog(`Wallet connected: ${userAddress}`, "success");
+                
+                // Check initial network
+                const net = await provider.getNetwork();
+                const chainIdHex = "0x" + net.chainId.toString(16);
+                if(NETWORKS[chainIdHex]) {
+                    document.getElementById('networkSelect').value = chainIdHex;
+                    currentChainId = chainIdHex;
+                } else {
+                    handleNetworkChange(); // Force switch to default selected
+                }
+                updateUIState();
+
+            } catch(e) {
+                addLog(e.message, "error");
+            }
         }
 
+        // 5. DEPLOYMENT LOGIC
         async function deployToken() {
             const name = document.getElementById('inputName').value.trim();
             const symbol = document.getElementById('inputSymbol').value.trim();
             const supply = document.getElementById('inputSupply').value;
             
-            if(!name || !symbol || !supply) return addLog("Error: Please fill Name, Symbol and Supply.", "error");
+            if(!name || !symbol || !supply) return addLog("Error: Please fill all fields.", "error");
 
             const btn = document.getElementById('btnDeploy');
             btn.disabled = true;
-            btn.innerText = "Processing...";
+            btn.innerHTML = `<span class="animate-pulse">Processing Transaction...</span>`;
 
             try {
+                const net = NETWORKS[currentChainId];
+                addLog(`--- START DEPLOYMENT SEQUENCE ---`);
+                addLog(`Target Chain: ${net.name}`);
+                addLog(`Params: ${name} (${symbol}) - Supply: ${supply}`);
+
                 const factory = new ethers.ContractFactory(STANDARD_ABI, BYTECODE_BASE, signer);
                 const supplyWei = ethers.parseUnits(supply, 18);
-                const net = NETWORKS[currentChainId];
 
-                addLog(`1. Initializing Contract...`);
-                addLog(`   Name: ${name}, Symbol: ${symbol}, Supply: ${supply}`, "info");
-
-                // FORCE MANUAL GAS LIMIT (4M) to bypass estimation errors on weird RPCs
-                // This is the key fix for "CALL_EXCEPTION" or "Reverted" errors during simulation
+                // FORCE MANUAL GAS LIMIT
+                // This bypasses "estimateGas" errors on some testnets
                 const deployTx = await factory.getDeployTransaction(name, symbol, supplyWei);
                 
-                addLog(`2. Sending Transaction (GasLimit: 4,000,000)...`);
+                addLog("Broadcasting transaction...", "warning");
                 
                 const tx = await signer.sendTransaction({
                     data: deployTx.data,
-                    gasLimit: 4000000 // Hardcoded safety limit
+                    gasLimit: 4000000 // Safe high limit
                 });
 
-                addLog(`3. Transaction Sent! Hash: ${tx.hash}`, "warning");
-                addLog(`   Waiting for confirmation...`);
+                addLog(`Tx Hash: ${tx.hash}`, "info");
+                addLog("Waiting for block confirmation...");
 
                 const receipt = await tx.wait();
                 
-                if (receipt.status === 1) {
+                if(receipt.status === 1) {
                     const address = receipt.contractAddress;
                     document.getElementById('deployedAddress').innerText = address;
                     document.getElementById('etherscanLink').href = `${net.explorer}/address/${address}`;
                     document.getElementById('successCard').classList.remove('hidden');
-                    addLog(`✅ DEPLOYMENT SUCCESSFUL!`, "success");
-                    addLog(`   Contract: ${address}`, "success");
+                    addLog(`✅ SUCCESS! Contract Address: ${address}`, "success");
+                    addLog(`Token minted to: ${userAddress}`, "success");
                 } else {
-                    throw new Error("Transaction mined but execution failed (Status 0).");
+                    throw new Error("Transaction reverted by EVM (Status 0)");
                 }
 
             } catch(e) {
                 console.error(e);
-                addLog(`FAILED: ${e.reason || e.message}`, "error");
-                if(e.receipt) addLog(`Receipt Status: ${e.receipt.status}`, "error");
+                addLog(`DEPLOY FAILED: ${e.reason || e.message}`, "error");
             } finally {
                 btn.disabled = false;
-                btn.innerText = "DEPLOY TOKEN NOW 🚀";
+                btn.innerText = "DEPLOY TOKEN 🚀";
             }
         }
-        
-        function copyAddress() { navigator.clipboard.writeText(document.getElementById('deployedAddress').innerText); }
+
+        function copyAddress() {
+            navigator.clipboard.writeText(document.getElementById('deployedAddress').innerText);
+            addLog("Address copied to clipboard.", "info");
+        }
+
+        // Initialize Icons
         lucide.createIcons();
     </script>
 </body>
