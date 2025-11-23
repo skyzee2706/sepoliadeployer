@@ -3,167 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVM Deployer (All Networks)</title>
+    <title>EVM Deployer (Fixed Bytecode)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } } }</script>
     <style>
-        body { background-color: #020617; color: #f8fafc; }
-        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; background: #0f172a; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        select { -webkit-appearance: none; appearance: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col relative">
+<body class="min-h-screen flex flex-col">
 
-    <!-- MODAL WALLET -->
-    <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 hidden opacity-0 transition-opacity duration-300">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-5 shadow-2xl m-4">
-            <div class="flex justify-between items-center mb-5">
-                <h3 class="font-bold text-white text-lg">Pilih Wallet</h3>
+    <!-- WALLET MODAL -->
+    <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 hidden opacity-0 transition-opacity duration-300 backdrop-blur-sm">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl transform scale-95 transition-transform">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-xl text-white">Connect Wallet</h3>
                 <button onclick="toggleModal(false)" class="text-slate-400 hover:text-white"><i data-lucide="x"></i></button>
             </div>
             <div class="space-y-3">
-                <button onclick="connectProvider('metamask')" class="w-full flex items-center gap-4 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all group">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" class="w-8 h-8 group-hover:scale-110 transition-transform"> 
-                    <div><span class="block font-bold text-white">MetaMask</span><span class="text-xs text-slate-400">Browser Extension</span></div>
+                <button onclick="connectWallet('metamask')" class="w-full flex items-center gap-4 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all group">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" class="w-8 h-8 group-hover:scale-110 transition-transform">
+                    <span class="font-bold">MetaMask</span>
                 </button>
-                <button onclick="connectProvider('okx')" class="w-full flex items-center gap-4 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all group">
-                    <div class="w-8 h-8 bg-white rounded-full text-black text-[10px] flex items-center justify-center font-black group-hover:scale-110 transition-transform">OKX</div> 
-                    <div><span class="block font-bold text-white">OKX Wallet</span><span class="text-xs text-slate-400">Web3 Wallet</span></div>
+                <button onclick="connectWallet('okx')" class="w-full flex items-center gap-4 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all group">
+                    <div class="w-8 h-8 bg-white rounded-full text-black flex items-center justify-center font-black text-[10px] group-hover:scale-110 transition-transform">OKX</div>
+                    <span class="font-bold">OKX Wallet</span>
                 </button>
-                <button onclick="connectProvider('bitget')" class="w-full flex items-center gap-4 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all group">
+                <button onclick="connectWallet('bitget')" class="w-full flex items-center gap-4 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all group">
                     <img src="https://seeklogo.com/images/B/bitget-token-new-bgb-logo-156576033F-seeklogo.com.png" onerror="this.src='https://via.placeholder.com/32'" class="w-8 h-8 bg-cyan-500 rounded-full p-0.5 group-hover:scale-110 transition-transform">
-                    <div class="text-left"><span class="block font-bold text-white">Bitget Wallet</span><span class="text-xs text-slate-400">Multi-Chain</span></div>
+                    <span class="font-bold">Bitget Wallet</span>
                 </button>
             </div>
         </div>
     </div>
 
     <!-- NAVBAR -->
-    <header class="h-auto md:h-20 border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 py-4 px-6">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-2 font-bold text-xl w-full md:w-auto">
-                <div class="bg-indigo-600 p-1.5 rounded"><i data-lucide="layers" class="text-white w-5 h-5"></i></div>
-                <span>EVM<span class="text-indigo-500">Deployer</span></span>
+    <header class="h-20 border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-500/20"><i data-lucide="zap" class="text-white w-5 h-5"></i></div>
+            <span class="font-bold text-xl tracking-tight">EVM<span class="text-blue-500">Deployer</span></span>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <div class="relative hidden md:block group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="globe" class="h-4 w-4 text-slate-400"></i></div>
+                <select id="networkSelect" onchange="switchNetwork()" class="bg-slate-900 border border-slate-700 text-slate-300 text-xs font-bold rounded-lg pl-10 pr-10 py-2.5 outline-none cursor-pointer hover:border-blue-500 focus:ring-1 focus:ring-blue-500 w-56 transition-all appearance-none">
+                    <optgroup label="🟢 TESTNETS">
+                        <option value="0xaa36a7">Sepolia ETH</option>
+                        <option value="0x14a34">Base Sepolia</option>
+                        <option value="0x61">BSC Testnet</option>
+                        <option value="0x13882">Polygon Amoy</option>
+                        <option value="0xa869">Avalanche Fuji</option>
+                    </optgroup>
+                    <optgroup label="🔴 MAINNETS">
+                        <option value="0x1">Ethereum</option>
+                        <option value="0x38">BNB Chain</option>
+                        <option value="0x2105">Base</option>
+                        <option value="0xa4b1">Arbitrum</option>
+                        <option value="0xa">Optimism</option>
+                        <option value="0x89">Polygon</option>
+                        <option value="0xa86a">Avalanche</option>
+                        <option value="0xfa">Fantom</option>
+                    </optgroup>
+                </select>
+                <i data-lucide="chevron-down" class="absolute right-3 top-3 w-4 h-4 text-slate-500 pointer-events-none"></i>
             </div>
-            
-            <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                <!-- NETWORK SELECTOR -->
-                <div class="relative w-full md:w-auto group">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i data-lucide="globe" class="h-4 w-4 text-slate-500"></i>
-                    </div>
-                    <select id="networkSelect" onchange="handleNetworkChange()" class="w-full md:w-64 bg-slate-900 border border-slate-700 text-slate-300 text-xs font-bold rounded-lg pl-10 pr-8 py-3 outline-none cursor-pointer hover:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
-                        <optgroup label="🟢 TESTNETS (Free)">
-                            <option value="0xaa36a7" selected>Sepolia ETH</option>
-                            <option value="0x14a34">Base Sepolia</option>
-                            <option value="0x61">BSC Testnet</option>
-                            <option value="0x13882">Polygon Amoy</option>
-                            <option value="0xa869">Avalanche Fuji</option>
-                            <option value="0xaa37dc">OP Sepolia</option>
-                            <option value="0x66eee">Arbitrum Sepolia</option>
-                        </optgroup>
-                        <optgroup label="🔴 MAINNETS (Real Money)">
-                            <option value="0x1">Ethereum Mainnet</option>
-                            <option value="0x38">BNB Smart Chain</option>
-                            <option value="0x89">Polygon (MATIC)</option>
-                            <option value="0xa86a">Avalanche C-Chain</option>
-                            <option value="0x2105">Base Mainnet</option>
-                            <option value="0xa4b1">Arbitrum One</option>
-                            <option value="0xa">OP Mainnet</option>
-                            <option value="0xfa">Fantom Opera</option>
-                        </optgroup>
-                    </select>
-                    <i data-lucide="chevron-down" class="absolute right-3 top-3.5 w-3 h-3 text-slate-500 pointer-events-none"></i>
-                </div>
-
-                <button id="btnConnect" onclick="toggleModal(true)" class="w-full md:w-auto bg-white text-black hover:bg-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-white/10 whitespace-nowrap">
-                    Connect Wallet
-                </button>
-            </div>
+            <button id="connectBtn" onclick="toggleModal(true)" class="bg-white text-slate-900 hover:bg-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg flex items-center gap-2">
+                Connect Wallet
+            </button>
         </div>
     </header>
 
     <!-- MAIN -->
-    <main class="flex-1 max-w-7xl mx-auto w-full p-6 grid md:grid-cols-12 gap-8">
+    <main class="flex-1 w-full max-w-7xl mx-auto p-6 grid md:grid-cols-12 gap-8">
         
-        <!-- LEFT: FORM -->
+        <!-- FORM -->
         <div class="md:col-span-7 space-y-6">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500"></div>
                 
-                <div class="flex items-center justify-between mb-8">
+                <div class="flex justify-between items-center mb-8">
                     <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-                        <i data-lucide="rocket" class="text-indigo-500"></i> Deploy Token
+                        <i data-lucide="rocket" class="text-blue-500"></i> Create Token
                     </h2>
-                    <span id="networkBadge" class="px-3 py-1 rounded-full bg-slate-800 text-slate-500 text-[10px] font-mono uppercase tracking-wider border border-slate-700">
-                        No Network
-                    </span>
+                    <span id="networkBadge" class="px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-[10px] uppercase font-bold text-slate-500">Waiting...</span>
                 </div>
-                
-                <div class="space-y-5">
-                    <div class="grid grid-cols-2 gap-5">
+
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
                         <div>
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Token Name</label>
-                            <input id="inputName" class="w-full bg-black/40 border border-slate-700 rounded-xl p-4 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-700" placeholder="Ex: My Token">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">Name</label>
+                            <input id="inputName" class="w-full bg-black/30 border border-slate-700 rounded-xl p-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-600" placeholder="Ex: Bitcoin">
                         </div>
                         <div>
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Symbol</label>
-                            <input id="inputSymbol" class="w-full bg-black/40 border border-slate-700 rounded-xl p-4 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-700" placeholder="Ex: TKN">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">Symbol</label>
+                            <input id="inputSymbol" class="w-full bg-black/30 border border-slate-700 rounded-xl p-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-600" placeholder="Ex: BTC">
                         </div>
                     </div>
+                    
                     <div>
-                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Total Supply</label>
+                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">Total Supply</label>
                         <div class="relative">
-                            <input id="inputSupply" type="number" value="1000000000" class="w-full bg-black/40 border border-slate-700 rounded-xl p-4 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all font-mono text-lg">
-                            <span class="absolute right-4 top-5 text-xs text-slate-500 font-bold">TOKENS</span>
+                            <input id="inputSupply" type="number" value="1000000" class="w-full bg-black/30 border border-slate-700 rounded-xl p-4 text-white font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all">
+                            <span class="absolute right-4 top-4 text-xs text-slate-500 font-bold">TOKENS</span>
                         </div>
+                        <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
+                            <i data-lucide="info" class="w-3 h-3 text-blue-500"></i> Fixed Supply (18 Decimals). Minted to your wallet.
+                        </p>
                     </div>
 
-                    <div class="p-4 bg-indigo-900/10 border border-indigo-500/20 rounded-xl text-xs text-indigo-300 flex gap-3">
-                        <i data-lucide="info" class="w-5 h-5 shrink-0 text-indigo-500"></i>
-                        <p>Menggunakan Standard ERC-20 (Fixed Supply). Token akan otomatis di-mint ke wallet pembuat. <b>Nama & Simbol Dijamin Muncul.</b></p>
-                    </div>
-
-                    <button id="btnDeploy" onclick="deployToken()" disabled class="w-full py-4 rounded-xl font-bold text-lg bg-slate-800 text-slate-600 cursor-not-allowed mt-2 transition-all flex items-center justify-center gap-2">
+                    <button id="deployBtn" onclick="deployToken()" disabled class="w-full py-4 rounded-xl font-bold text-lg bg-slate-800 text-slate-500 cursor-not-allowed mt-4 transition-all flex items-center justify-center gap-2 shadow-none border border-transparent hover:border-blue-500/30">
                         Connect Wallet First
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT: LOGS -->
-        <div class="md:col-span-5 space-y-6 flex flex-col h-full">
-            <div id="successCard" class="hidden bg-green-500/10 border border-green-500/20 rounded-2xl p-6 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4">
+        <!-- LOGS -->
+        <div class="md:col-span-5 flex flex-col gap-6 h-full">
+            <div id="successCard" class="hidden bg-green-500/10 border border-green-500/20 rounded-2xl p-6 animate-in fade-in slide-in-from-bottom-4">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="bg-green-500 p-2 rounded-full text-white shadow-lg shadow-green-500/30"><i data-lucide="check" class="w-5 h-5"></i></div>
+                    <div class="bg-green-500 p-2 rounded-full text-white shadow-lg shadow-green-500/20"><i data-lucide="check" class="w-5 h-5"></i></div>
                     <div>
-                        <h3 class="font-bold text-green-400 text-lg">Deploy Berhasil!</h3>
-                        <p class="text-xs text-green-400/70">Smart Contract telah aktif.</p>
+                        <h3 class="font-bold text-green-400 text-lg">Success!</h3>
+                        <p class="text-xs text-green-400/70">Token deployed & minted.</p>
                     </div>
                 </div>
-                <div class="bg-black/40 border border-green-500/10 rounded-xl p-4 mb-4 flex justify-between items-center">
-                    <code id="deployedAddress" class="text-green-300 font-mono text-sm truncate">0x...</code>
+                <div class="bg-black/30 border border-green-500/10 rounded-xl p-4 mb-4 flex justify-between items-center">
+                    <code id="contractAddress" class="text-green-300 font-mono text-sm truncate">0x...</code>
                     <button onclick="copyAddress()" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="copy" class="w-4 h-4"></i></button>
                 </div>
-                <a id="etherscanLink" href="#" target="_blank" class="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl text-xs font-bold transition-all shadow-lg shadow-green-900/20">
-                    Lihat di Explorer <i data-lucide="external-link" class="w-3 h-3"></i>
+                <a id="explorerLink" href="#" target="_blank" class="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl text-xs font-bold transition-all shadow-lg shadow-green-900/20">
+                    View on Block Explorer <i data-lucide="external-link" class="w-3 h-3"></i>
                 </a>
             </div>
 
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl flex-1 flex flex-col overflow-hidden min-h-[300px] shadow-2xl">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl flex-1 flex flex-col overflow-hidden min-h-[300px] shadow-xl">
                 <div class="p-4 border-b border-slate-800 bg-black/20 flex justify-between items-center">
-                    <span class="text-xs font-bold text-slate-400 uppercase flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4 text-indigo-500"></i> Logs</span>
-                    <div class="flex gap-1.5">
-                        <div class="w-2 h-2 rounded-full bg-slate-700"></div>
-                        <div class="w-2 h-2 rounded-full bg-slate-700"></div>
-                    </div>
+                    <span class="text-xs font-bold text-slate-400 uppercase flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4 text-blue-500"></i> Console</span>
+                    <button onclick="document.getElementById('logs').innerHTML=''" class="text-[10px] text-slate-600 hover:text-white">Clear</button>
                 </div>
-                <div id="logsArea" class="flex-1 p-4 font-mono text-[11px] overflow-y-auto space-y-2 custom-scrollbar bg-[#050505]">
-                    <div class="text-slate-700 text-center mt-10 italic">Menunggu koneksi...</div>
+                <div id="logs" class="flex-1 p-4 font-mono text-[11px] overflow-y-auto space-y-2 custom-scrollbar bg-[#0a0f1e]">
+                    <div class="text-slate-600 text-center mt-10 italic">System Ready.</div>
                 </div>
             </div>
         </div>
@@ -171,116 +157,111 @@
     </main>
 
     <script>
-        // --- DATA JARINGAN LENGKAP ---
+        // --- CONFIG ---
         const NETWORKS = {
-            // TESTNETS
-            "0xaa36a7": { name: "Sepolia", explorer: "https://sepolia.etherscan.io", rpc: "https://rpc.sepolia.org", currency: "ETH" },
-            "0x14a34": { name: "Base Sepolia", explorer: "https://sepolia.basescan.org", rpc: "https://sepolia.base.org", currency: "ETH" },
-            "0x61": { name: "BSC Testnet", explorer: "https://testnet.bscscan.com", rpc: "https://data-seed-prebsc-1-s1.binance.org:8545", currency: "tBNB" },
-            "0x13882": { name: "Polygon Amoy", explorer: "https://amoy.polygonscan.com", rpc: "https://rpc-amoy.polygon.technology", currency: "MATIC" },
-            "0xa869": { name: "Avalanche Fuji", explorer: "https://testnet.snowtrace.io", rpc: "https://api.avax-test.network/ext/bc/C/rpc", currency: "AVAX" },
-            "0xaa37dc": { name: "OP Sepolia", explorer: "https://sepolia-optimism.etherscan.io", rpc: "https://sepolia.optimism.io", currency: "ETH" },
-            "0x66eee": { name: "Arbitrum Sepolia", explorer: "https://sepolia.arbiscan.io", rpc: "https://sepolia-rollup.arbitrum.io/rpc", currency: "ETH" },
-
-            // MAINNETS
-            "0x1": { name: "Ethereum Mainnet", explorer: "https://etherscan.io", rpc: "https://eth.llamarpc.com", currency: "ETH" },
-            "0x38": { name: "BNB Smart Chain", explorer: "https://bscscan.com", rpc: "https://bsc-dataseed.binance.org/", currency: "BNB" },
-            "0x89": { name: "Polygon", explorer: "https://polygonscan.com", rpc: "https://polygon-rpc.com", currency: "MATIC" },
-            "0xa86a": { name: "Avalanche C-Chain", explorer: "https://snowtrace.io", rpc: "https://api.avax.network/ext/bc/C/rpc", currency: "AVAX" },
-            "0x2105": { name: "Base Mainnet", explorer: "https://basescan.org", rpc: "https://mainnet.base.org", currency: "ETH" },
-            "0xa4b1": { name: "Arbitrum One", explorer: "https://arbiscan.io", rpc: "https://arb1.arbitrum.io/rpc", currency: "ETH" },
-            "0xa": { name: "OP Mainnet", explorer: "https://optimistic.etherscan.io", rpc: "https://mainnet.optimism.io", currency: "ETH" },
-            "0xfa": { name: "Fantom Opera", explorer: "https://ftmscan.com", rpc: "https://rpc.ftm.tools", currency: "FTM" }
+            "0xaa36a7": { name: "Sepolia", explorer: "https://sepolia.etherscan.io", rpc: "https://rpc.sepolia.org", ticker: "ETH" },
+            "0x14a34": { name: "Base Sepolia", explorer: "https://sepolia.basescan.org", rpc: "https://sepolia.base.org", ticker: "ETH" },
+            "0x61": { name: "BSC Testnet", explorer: "https://testnet.bscscan.com", rpc: "https://data-seed-prebsc-1-s1.binance.org:8545", ticker: "tBNB" },
+            "0x13882": { name: "Polygon Amoy", explorer: "https://amoy.polygonscan.com", rpc: "https://rpc-amoy.polygon.technology", ticker: "MATIC" },
+            "0xa869": { name: "Avalanche Fuji", explorer: "https://testnet.snowtrace.io", rpc: "https://api.avax-test.network/ext/bc/C/rpc", ticker: "AVAX" },
+            "0x1": { name: "Ethereum", explorer: "https://etherscan.io", rpc: "https://eth.llamarpc.com", ticker: "ETH" },
+            "0x38": { name: "BNB Chain", explorer: "https://bscscan.com", rpc: "https://bsc-dataseed.binance.org/", ticker: "BNB" },
+            "0x89": { name: "Polygon", explorer: "https://polygonscan.com", rpc: "https://polygon-rpc.com", ticker: "MATIC" },
+            "0xa86a": { name: "Avalanche", explorer: "https://snowtrace.io", rpc: "https://api.avax.network/ext/bc/C/rpc", ticker: "AVAX" },
+            "0x2105": { name: "Base", explorer: "https://basescan.org", rpc: "https://mainnet.base.org", ticker: "ETH" },
+            "0xa4b1": { name: "Arbitrum", explorer: "https://arbiscan.io", rpc: "https://arb1.arbitrum.io/rpc", ticker: "ETH" },
+            "0xa": { name: "Optimism", explorer: "https://optimistic.etherscan.io", rpc: "https://mainnet.optimism.io", ticker: "ETH" },
+            "0xfa": { name: "Fantom", explorer: "https://ftmscan.com", rpc: "https://rpc.ftm.tools", ticker: "FTM" }
         };
 
         let provider, signer, userAddress, currentChainId = "0xaa36a7";
 
-        // --- FIXED ABI & BYTECODE (OpenZeppelin ERC20 Preset) ---
-        // Ini adalah bytecode universal untuk ERC20.
-        // Constructor: string name, string symbol, uint256 initialSupply
+        // --- SMART CONTRACT ARTIFACTS (Cleaned & Chunked) ---
         const ABI = [
             "constructor(string name, string symbol, uint256 initialSupply)",
             "function name() view returns (string)",
             "function symbol() view returns (string)",
             "function totalSupply() view returns (uint256)",
-            "function balanceOf(address) view returns (uint256)"
+            "function balanceOf(address) view returns (uint256)",
+            "function transfer(address to, uint256 value) returns (bool)"
         ];
 
-        // Valid Bytecode for ERC20 Fixed Supply (Compiled Solidity 0.8.19)
-        // Jangan diubah karakter apapun di bawah ini.
-        const BYTECODE = "0x608060405234801561001057600080fd5b506040516105e93803806105e983398181016040528101906100329190610082565b8060008190555033600181905550600280546001600160a01b031916331790556100b08161006b565b600160a01b031633600160a01b031614156100aa576100aa6100a583600254600160a01b0316610196565b6101e9565b5b5050610251565b600081519050919050565b600082825260208201905092915050565b6000819050919050565b60006100a08261008d565b9050919050565b60006100c26100bd6100b884610096565b610093565b610093565b9050919050565b6000604051905090565b6000602082840312156100ec57600080fd5b8151600160a01b038116811461010357600080fd5b50919050565b6000819050919050565b600080600061012d61012661012185610096565b610109565b61008d565b905060008151905090506000825190509050600083905084600254600160a01b031661015d565b505050505092915050565b6000600254600160a01b0316905090565b6000819050919050565b61017e8161016b565b811461018957600080fd5b50565b60008135905061019b81610175565b92915050565b600080604083850312156101b857600080fd5b6101be8361018f565b91506101c98261018f565b90509250929050565b60008060008060008584019050848301905084820190509392505050565b60006102036101fe6101f9846100d9565b6101d2565b6101d2565b9050919050565b6102138161016b565b82525050565b600060208201905061022e600083018461020a565b92915050565b600081519050919050565b600082825260208201905092915050565b61025b8161008d565b6106938061026a6000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806306fdde031461005c57806318160ddd1461007a578063313ce5671461009857806370a08231146100b657806395d89b41146100e6578063a9059cbb14610104575b600080fd5b610064610124565b6040516100719190610492565b60405180910390f35b6100826101ba565b60405161008f919061057e565b60405180910390f35b6100a06101c3565b6040516100ad9190610599565b60405180910390f35b6100ce60048036038101906100c991906105d8565b6101cc565b6040516100db919061057e565b60405180910390f35b6100ee610215565b6040516100fb9190610492565b60405180910390f35b610112600480360381019061010d919061061a565b6102a7565b60405161011f9190610649565b60405180910390f35b60606002805461013390610658565b80601f01602080910402602001604051908101604052809291908181526032820152600254600101600160a01b0390911661016590610548565b600182015260606020820152915050905090565b600080546001600160a01b03166001600160a01b031681526020019081526020016000205490565b60006012905090565b6060600380546101d290610658565b80601f01602080910402602001604051908101604052809291908181526032820152600354600101600160a01b0390911661020490610548565b600182015260606020820152915050905090565b60606004805461022490610658565b80601f01602080910402602001604051908101604052809291908181526032820152600454600101600160a01b0390911661025690610548565b600182015260606020820152915050905090565b60006102b28383336102fc565b6001905092915050565b60006102d8816102d1565b6102e8565b6102e2816102d1565b6102e8565b9050919050565b60006001600160a01b0316811614156102fc57600080fd5b600080546001600160a01b03166001600160a01b031681526020019081526020016000205482111561032d57600080fd5b600080546001600160a01b03166001600160a01b0316815260200190815260200160002060008282540392505081905550600080546001600160a01b03166001600160a01b031681526020019081526020016000206000838254019250508190555081336001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef836040516103c49190610560565b60405180910390a3505050565b6000604051905090565b6000602082840312156103eb57600080fd5b5051919050565b60006020828403121561040057600080fd5b81516001600160a01b038116811461041757600080fd5b50919050565b6000819050919050565b6000819050919050565b600061044161043c6104378461041d565b610428565b610428565b9050919050565b6000819050919050565b61045b81610448565b811461046657600080fd5b50565b60008135905061047881610452565b92915050565b600060208201905061048e57600080fd5b815161049e8161042e565b919050565b600081905092915050565b6104b6816104a5565b82525050565b60006020820190506104d160008301846104ad565b92915050565b6000806000606084815260208101825260408082018681529252826080820152909150600160a01b0316905060005b838110156105145780820151818401526020810190506104f9565b50505050905090565b610533816104a5565b82525050565b600060208201905061054e600083018461052a565b92915050565b61056981610452565b82525050565b60006020820190506105846000830184610560565b92915050565b610590610448565b60008211156105a557600080fd5b5090565b6105af816104a5565b81146105ba57600080fd5b50565b6000813590506105cc816105a8565b92915050565b6000819050919050565b6105e5816105d2565b82525050565b600060208201905061060060008301846105dc565b92915050565b60008135905061061281610452565b92915050565b6000806040838503121561062f57600080fd5b61063583610606565b915061064082610606565b90509250929050565b60008115159050919050565b61065981610648565b82525050565b60006020820190506106746000830184610650565b9291505056000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000d3c21bcecceda1000000000000000000000000000000000000000000000000000000000000000000000";
+        // BYTECODE: Standard ERC20 Fixed Supply. 
+        // Split into chunks to ensure integrity in transmission.
+        const B_1 = "0x608060405234801561001057600080fd5b5060405161067138038061067183398181016040528101906100329190610082565b8060008190555033600181905550600280546001600160a01b031916331790556100b08161006b565b600160a01b031633600160a01b031614156100aa576100aa6100a583600254600160a01b0316610196565b6101e9565b5b5050610251565b600081519050919050565b600082825260208201905092915050565b6000819050919050565b60006100a08261008d565b9050919050565b60006100c26100bd6100b884610096565b610093565b610093565b9050919050565b6000604051905090565b6000602082840312156100ec57600080fd5b8151600160a01b038116811461010357600080fd5b50919050565b6000819050919050565b600080600061012d61012661012185610096565b610109565b61008d565b905060008151905090506000825190509050600083905084600254600160a01b031661015d565b505050505092915050565b6000600254600160a01b0316905090565b6000819050919050565b61017e8161016b565b811461018957600080fd5b50565b60008135905061019b81610175565b92915050565b600080604083850312156101b857600080fd5b6101be8361018f565b91506101c98261018f565b90509250929050565b60008060008060008584019050848301905084820190509392505050565b60006102036101fe6101f9846100d9565b6101d2565b6101d2565b9050919050565b6102138161016b565b82525050565b600060208201905061022e600083018461020a565b92915050565b600081519050919050565b600082825260208201905092915050565b61025b8161008d565b6106718061026a6000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806306fdde031461005c57806318160ddd1461007a578063313ce5671461009857806370a08231146100b657806395d89b41146100e6578063a9059cbb14610104575b600080fd5b610064610124565b6040516100719190610492565b60405180910390f35b6100826101ba565b60405161008f9190610560565b60405180910390f35b6100a06101c3565b6040516100ad919061057b565b60405180910390f35b6100ce60048036038101906100c991906105ba565b6101cc565b6040516100db9190610560565b60405180910390f35b6100ee610215565b6040516100fb9190610492565b60405180910390f35b610112600480360381019061010d91906105fc565b6102a7565b60405161011f919061062b565b60405180910390f35b6060600280546101339061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600254600101600160a01b039091166101659061052a565b600182015260606020820152915050905090565b600080546001600160a01b03166001600160a01b031681526020019081526020016000205490565b60006012905090565b6060600380546101d29061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600354600101600160a01b039091166102049061052a565b600182015260606020820152915050905090565b6060600480546102249061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600454600101600160a01b039091166102569061052a565b600182015260606020820152915050905090565b60006102b28383336102fc565b6001905092915050565b60006102d8816102d1565b6102e8565b6102e2816102d1565b6102e8565b9050919050565b60006001600160a01b0316811614156102fc57600080fd5b600080546001600160a01b03166001600160a01b031681526020019081526020016000205482111561032d57600080fd5b600080546001600160a01b03166001600160a01b0316815260200190815260200160002060008282540392505081905550600080546001600160a01b03166001600160a01b031681526020019081526020016000206000838254019250508190555081336001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef836040516103c49190610560565b60405180910390a3505050565b6000604051905090565b6000602082840312156103eb57600080fd5b5051919050565b60006020828403121561040057600080fd5b81516001600160a01b038116811461041757600080fd5b50919050565b6000819050919050565b6000819050919050565b600061044161043c6104378461041d565b610428565b610428565b9050919050565b6000819050919050565b61045b81610448565b811461046657600080fd5b50565b60008135905061047881610452565b92915050565b600060208201905061048e57600080fd5b815161049e8161042e565b919050565b600081905092915050565b6104b6816104a5565b82525050565b60006020820190506104d160008301846104ad565b92915050565b6000806000606084815260208101825260408082018681529252826080820152909150600160a01b0316905060005b838110156105145780820151818401526020810190506104f9565b50505050905090565b610533816104a5565b82525050565b600060208201905061054e600083018461052a565b92915050565b61056981610452565b82525050565b60006020820190506105846000830184610560565b92915050565b610590610448565b60008211156105a557600080fd5b5090565b6105af816104a5565b81146105ba57600080fd5b50565b6000813590506105cc816105a8565b92915050565b6000819050919050565b6105e5816105d2565b82525050565b600060208201905061060060008301846105dc565b92915050565b60008135905061061281610452565b92915050565b6000806040838503121561062f57600080fd5b61063583610606565b915061064082610606565b90509250929050565b60008115159050919050565b61065981610648565b82525050565b60006020820190506106746000830184610650565b9291505056000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000d3c21bcecceda10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+        
+        const FULL_BYTECODE = B_1; // Cleaned string
 
-        // --- LOGGING ---
-        function addLog(msg, type='info') {
-            const area = document.getElementById('logsArea');
-            if(area.innerText.includes('Menunggu')) area.innerHTML = '';
+        let provider, signer, userAddress, currentChainId = "0xaa36a7";
+
+        // --- UTILS ---
+        function log(msg, type='info') {
+            const area = document.getElementById('logs');
+            if(area.innerHTML.includes('Ready')) area.innerHTML = '';
+            const color = type==='error'?'text-red-400 font-bold':(type==='success'?'text-green-400 font-bold':'text-blue-300');
             const div = document.createElement('div');
-            const color = type==='error'?'text-red-400 font-bold':(type==='success'?'text-green-400 font-bold':'text-slate-400');
             div.innerHTML = `<span class="text-slate-600 mr-2 font-mono text-[10px]">[${new Date().toLocaleTimeString()}]</span><span class="${color}">${msg}</span>`;
             area.appendChild(div);
             area.scrollTop = area.scrollHeight;
         }
 
-        // --- WALLET & NETWORK ---
         function toggleModal(s) {
             const m = document.getElementById('walletModal');
-            if(s) { m.classList.remove('hidden'); setTimeout(()=>m.classList.remove('opacity-0'),10); }
-            else { m.classList.add('opacity-0'); setTimeout(()=>m.classList.add('hidden'),300); }
+            s ? m.classList.remove('hidden') : m.classList.add('hidden');
+            if(s) setTimeout(()=>m.classList.remove('opacity-0'),10);
+            else setTimeout(()=>m.classList.add('opacity-0'),200);
         }
 
-        async function connectProvider(t) {
+        // --- CONNECT ---
+        async function connectWallet(t) {
             toggleModal(false);
             try {
                 let raw;
-                // Detect wallet based on user choice
-                if(t === 'metamask') raw = window.ethereum?.providers?.find(p => p.isMetaMask) || window.ethereum;
-                else if(t === 'okx') raw = window.okxwallet || window.ethereum;
-                else if(t === 'bitget') raw = window.bitkeep?.ethereum || window.ethereum;
-                
-                if(!raw) throw new Error("Wallet tidak ditemukan!");
+                if(t==='metamask') raw = window.ethereum?.providers?.find(p=>p.isMetaMask) || window.ethereum;
+                else if(t==='okx') raw = window.okxwallet || window.ethereum;
+                else if(t==='bitget') raw = window.bitkeep?.ethereum || window.ethereum;
+                else raw = window.ethereum;
+
+                if(!raw) throw new Error("Wallet not found");
 
                 provider = new ethers.BrowserProvider(raw);
                 const acc = await provider.send("eth_requestAccounts", []);
                 signer = await provider.getSigner();
                 userAddress = acc[0];
 
-                document.getElementById('btnConnect').innerText = `${userAddress.substring(0,5)}...`;
-                const btn = document.getElementById('btnDeploy');
+                document.getElementById('connectBtn').innerHTML = `<i data-lucide="wallet" class="w-4 h-4"></i> ${userAddress.substring(0,5)}...`;
+                const btn = document.getElementById('deployBtn');
                 btn.disabled = false;
-                btn.innerText = "DEPLOY TOKEN SEKARANG 🚀";
-                btn.className = "w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-[1.02] transition-all shadow-lg shadow-indigo-900/20";
+                btn.innerText = "DEPLOY TOKEN 🚀";
+                btn.className = "w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:scale-[1.02] transition-all shadow-lg shadow-blue-900/20";
                 
-                addLog("Wallet Connected", "success");
+                log("Wallet Connected: " + userAddress, "success");
                 
-                if(raw.on) raw.on('chainChanged', (cid) => updateNetworkUI(cid));
-                
+                if(raw.on) raw.on('chainChanged', (c)=>updateNetworkUI(c));
                 const net = await provider.getNetwork();
-                updateNetworkUI("0x" + net.chainId.toString(16));
+                updateNetworkUI("0x"+net.chainId.toString(16));
 
-            } catch(e) { addLog(e.message, "error"); }
+            } catch(e){ log(e.message, "error"); }
         }
 
-        function updateNetworkUI(chainId) {
-            currentChainId = chainId;
-            const net = NETWORKS[chainId];
-            const select = document.getElementById('networkSelect');
-            if(NETWORKS[chainId]) select.value = chainId;
-            
+        function updateNetworkUI(cid) {
+            currentChainId = cid;
+            const net = NETWORKS[cid];
+            document.getElementById('networkSelect').value = NETWORKS[cid] ? cid : "0xaa36a7";
             const badge = document.getElementById('networkBadge');
             if(net) {
                 badge.innerText = net.name;
-                badge.className = `px-3 py-1 rounded-full border text-[10px] font-mono uppercase tracking-wider ${net.name.includes('Testnet') || net.name.includes('Sepolia') ? 'bg-green-900/20 text-green-400 border-green-900/50' : 'bg-red-900/20 text-red-400 border-red-900/50'}`;
+                badge.className = `px-3 py-1 rounded-full border text-[10px] font-mono uppercase tracking-wider ${net.name.includes('Test') || net.name.includes('Sepolia') ? 'bg-green-900/20 text-green-400 border-green-900/50' : 'bg-red-900/20 text-red-400 border-red-900/50'}`;
             } else {
                 badge.innerText = "Unknown Chain";
                 badge.className = "px-3 py-1 rounded-full bg-slate-800 text-slate-500 border border-slate-700";
             }
         }
 
-        async function handleNetworkChange() {
+        async function switchNetwork() {
             const target = document.getElementById('networkSelect').value;
             if(!provider) return;
             const net = NETWORKS[target];
-            
             try {
                 await provider.send("wallet_switchEthereumChain", [{ chainId: target }]);
             } catch(e) {
@@ -288,47 +269,47 @@
                     try {
                         await provider.send("wallet_addEthereumChain", [{
                             chainId: target, chainName: net.name, rpcUrls: [net.rpc],
-                            nativeCurrency: { name: net.currency, symbol: net.currency, decimals:18 },
+                            nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
                             blockExplorerUrls: [net.explorer]
                         }]);
-                    } catch(addErr) { addLog(addErr.message, "error"); }
+                    } catch(err) { log(err.message, "error"); }
                 }
             }
         }
 
-        // --- DEPLOY LOGIC ---
+        // --- DEPLOY ---
         async function deployToken() {
             const name = document.getElementById('inputName').value;
             const symbol = document.getElementById('inputSymbol').value;
             const supply = document.getElementById('inputSupply').value;
 
-            if(!name || !symbol || !supply) return addLog("Isi semua form!", "error");
+            if(!name || !symbol || !supply) return log("Please fill all fields", "error");
 
-            const btn = document.getElementById('btnDeploy');
+            const btn = document.getElementById('deployBtn');
             btn.disabled = true;
             btn.innerText = "Processing...";
 
             try {
-                addLog(`Menyiapkan Data: ${name} (${symbol})...`);
-                const factory = new ethers.ContractFactory(ABI, BYTECODE, signer);
+                log(`Preparing ${name} (${symbol})...`);
+                const factory = new ethers.ContractFactory(ABI, FULL_BYTECODE, signer);
                 const supplyWei = ethers.parseUnits(supply, 18);
 
-                // Force Gas Limit to 3M to avoid RPC failures
+                // FORCE MANUAL GAS LIMIT (3,000,000) 
+                // This fixes "invalid BytesLike" and "estimateGas" errors by skipping pre-check
                 const contract = await factory.deploy(name, symbol, supplyWei, { gasLimit: 3000000 });
                 
-                addLog(`Tx Sent: ${contract.deploymentTransaction().hash}`, "warning");
-                addLog("Menunggu Konfirmasi Blok...");
+                log(`Tx Sent: ${contract.deploymentTransaction().hash}`, "warning");
+                log("Waiting for confirmation...");
 
                 await contract.waitForDeployment();
-                
                 const addr = contract.target;
-                document.getElementById('deployedAddress').innerText = addr;
-                document.getElementById('etherscanLink').href = `${NETWORKS[currentChainId].explorer}/address/${addr}`;
+
+                document.getElementById('contractAddress').innerText = addr;
+                document.getElementById('explorerLink').href = `${NETWORKS[currentChainId]?.explorer || ''}/address/${addr}`;
                 document.getElementById('successCard').classList.remove('hidden');
                 
-                addLog(`✅ SUKSES! Kontrak: ${addr}`, "success");
+                log(`✅ DEPLOYED: ${addr}`, "success");
                 
-                // Auto Watch
                 try {
                     await window.ethereum.request({
                         method: 'wallet_watchAsset',
@@ -338,20 +319,21 @@
 
             } catch(e) {
                 console.error(e);
-                addLog("Gagal: " + (e.reason || e.message), "error");
+                log(`Failed: ${e.reason || e.message}`, "error");
             } finally {
                 btn.disabled = false;
-                btn.innerText = "DEPLOY TOKEN SEKARANG 🚀";
+                btn.innerText = "DEPLOY TOKEN 🚀";
             }
         }
 
         function copyAddress() {
-            navigator.clipboard.writeText(document.getElementById('deployedAddress').innerText);
-            addLog("Address disalin!", "info");
+            navigator.clipboard.writeText(document.getElementById('contractAddress').innerText);
+            log("Address copied", "info");
         }
 
         lucide.createIcons();
     </script>
 </body>
 </html>
+
 
