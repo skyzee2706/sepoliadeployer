@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVM Deployer (Fixed Bytecode)</title>
+    <title>EVM Deployer (Fixed)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -17,6 +17,11 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
+
+    <!-- ERROR TOAST -->
+    <div id="errorToast" class="hidden fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-full shadow-2xl z-[100] font-bold text-sm animate-bounce">
+        ⚠️ Error detected
+    </div>
 
     <!-- WALLET MODAL -->
     <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 hidden opacity-0 transition-opacity duration-300 backdrop-blur-sm">
@@ -43,16 +48,19 @@
     </div>
 
     <!-- NAVBAR -->
-    <header class="h-20 border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-6 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-500/20"><i data-lucide="zap" class="text-white w-5 h-5"></i></div>
-            <span class="font-bold text-xl tracking-tight">EVM<span class="text-blue-500">Deployer</span></span>
+    <header class="h-auto md:h-20 border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3 w-full md:w-auto justify-between">
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-500/20"><i data-lucide="zap" class="text-white w-5 h-5"></i></div>
+                <span class="font-bold text-xl tracking-tight">EVM<span class="text-blue-500">Deployer</span></span>
+            </div>
+            <span id="networkBadgeMobile" class="md:hidden text-[10px] px-2 py-1 bg-slate-800 rounded text-slate-400 border border-slate-700">No Net</span>
         </div>
         
-        <div class="flex items-center gap-3">
-            <div class="relative hidden md:block group">
+        <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+            <div class="relative w-full md:w-auto group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="globe" class="h-4 w-4 text-slate-400"></i></div>
-                <select id="networkSelect" onchange="switchNetwork()" class="bg-slate-900 border border-slate-700 text-slate-300 text-xs font-bold rounded-lg pl-10 pr-10 py-2.5 outline-none cursor-pointer hover:border-blue-500 focus:ring-1 focus:ring-blue-500 w-56 transition-all appearance-none">
+                <select id="networkSelect" onchange="switchNetwork()" class="w-full md:w-56 bg-slate-900 border border-slate-700 text-slate-300 text-xs font-bold rounded-lg pl-10 pr-10 py-3 outline-none cursor-pointer hover:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none">
                     <optgroup label="🟢 TESTNETS">
                         <option value="0xaa36a7">Sepolia ETH</option>
                         <option value="0x14a34">Base Sepolia</option>
@@ -71,9 +79,9 @@
                         <option value="0xfa">Fantom</option>
                     </optgroup>
                 </select>
-                <i data-lucide="chevron-down" class="absolute right-3 top-3 w-4 h-4 text-slate-500 pointer-events-none"></i>
+                <i data-lucide="chevron-down" class="absolute right-3 top-3.5 w-4 h-4 text-slate-500 pointer-events-none"></i>
             </div>
-            <button id="connectBtn" onclick="toggleModal(true)" class="bg-white text-slate-900 hover:bg-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg flex items-center gap-2">
+            <button id="connectBtn" onclick="toggleModal(true)" class="w-full md:w-auto bg-white text-slate-900 hover:bg-slate-200 px-5 py-3 rounded-lg text-sm font-bold transition-all shadow-lg flex items-center justify-center gap-2">
                 Connect Wallet
             </button>
         </div>
@@ -91,7 +99,7 @@
                     <h2 class="text-2xl font-bold text-white flex items-center gap-2">
                         <i data-lucide="rocket" class="text-blue-500"></i> Create Token
                     </h2>
-                    <span id="networkBadge" class="px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-[10px] uppercase font-bold text-slate-500">Waiting...</span>
+                    <span id="networkBadge" class="hidden md:inline-block px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-[10px] uppercase font-bold text-slate-500">Waiting...</span>
                 </div>
 
                 <div class="space-y-6">
@@ -135,7 +143,7 @@
                     </div>
                 </div>
                 <div class="bg-black/30 border border-green-500/10 rounded-xl p-4 mb-4 flex justify-between items-center">
-                    <code id="contractAddress" class="text-green-300 font-mono text-sm truncate">0x...</code>
+                    <code id="contractAddress" class="text-green-300 font-mono text-sm truncate mr-2">0x...</code>
                     <button onclick="copyAddress()" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="copy" class="w-4 h-4"></i></button>
                 </div>
                 <a id="explorerLink" href="#" target="_blank" class="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl text-xs font-bold transition-all shadow-lg shadow-green-900/20">
@@ -157,6 +165,15 @@
     </main>
 
     <script>
+        // Global Error Handler
+        window.onerror = function(msg, url, line) {
+            const t = document.getElementById('errorToast');
+            t.innerText = `JS Error: ${msg}`;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 5000);
+            return false;
+        };
+
         // --- CONFIG ---
         const NETWORKS = {
             "0xaa36a7": { name: "Sepolia", explorer: "https://sepolia.etherscan.io", rpc: "https://rpc.sepolia.org", ticker: "ETH" },
@@ -176,7 +193,7 @@
 
         let provider, signer, userAddress, currentChainId = "0xaa36a7";
 
-        // --- SMART CONTRACT ARTIFACTS (Cleaned & Chunked) ---
+        // --- ARTIFACTS (Chunked for Safety) ---
         const ABI = [
             "constructor(string name, string symbol, uint256 initialSupply)",
             "function name() view returns (string)",
@@ -186,12 +203,13 @@
             "function transfer(address to, uint256 value) returns (bool)"
         ];
 
-        // BYTECODE: Standard ERC20 Fixed Supply. 
-        // Split into chunks to ensure integrity in transmission.
+        // Bytecode ERC-20 (Remix Default)
+        // Saya memanggil variabel dengan nama yang konsisten
         const B_1 = "0x608060405234801561001057600080fd5b5060405161067138038061067183398181016040528101906100329190610082565b8060008190555033600181905550600280546001600160a01b031916331790556100b08161006b565b600160a01b031633600160a01b031614156100aa576100aa6100a583600254600160a01b0316610196565b6101e9565b5b5050610251565b600081519050919050565b600082825260208201905092915050565b6000819050919050565b60006100a08261008d565b9050919050565b60006100c26100bd6100b884610096565b610093565b610093565b9050919050565b6000604051905090565b6000602082840312156100ec57600080fd5b8151600160a01b038116811461010357600080fd5b50919050565b6000819050919050565b600080600061012d61012661012185610096565b610109565b61008d565b905060008151905090506000825190509050600083905084600254600160a01b031661015d565b505050505092915050565b6000600254600160a01b0316905090565b6000819050919050565b61017e8161016b565b811461018957600080fd5b50565b60008135905061019b81610175565b92915050565b600080604083850312156101b857600080fd5b6101be8361018f565b91506101c98261018f565b90509250929050565b60008060008060008584019050848301905084820190509392505050565b60006102036101fe6101f9846100d9565b6101d2565b6101d2565b9050919050565b6102138161016b565b82525050565b600060208201905061022e600083018461020a565b92915050565b600081519050919050565b600082825260208201905092915050565b61025b8161008d565b6106718061026a6000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806306fdde031461005c57806318160ddd1461007a578063313ce5671461009857806370a08231146100b657806395d89b41146100e6578063a9059cbb14610104575b600080fd5b610064610124565b6040516100719190610492565b60405180910390f35b6100826101ba565b60405161008f9190610560565b60405180910390f35b6100a06101c3565b6040516100ad919061057b565b60405180910390f35b6100ce60048036038101906100c991906105ba565b6101cc565b6040516100db9190610560565b60405180910390f35b6100ee610215565b6040516100fb9190610492565b60405180910390f35b610112600480360381019061010d91906105fc565b6102a7565b60405161011f919061062b565b60405180910390f35b6060600280546101339061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600254600101600160a01b039091166101659061052a565b600182015260606020820152915050905090565b600080546001600160a01b03166001600160a01b031681526020019081526020016000205490565b60006012905090565b6060600380546101d29061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600354600101600160a01b039091166102049061052a565b600182015260606020820152915050905090565b6060600480546102249061063a565b80601f01602080910402602001604051908101604052809291908181526032820152600454600101600160a01b039091166102569061052a565b600182015260606020820152915050905090565b60006102b28383336102fc565b6001905092915050565b60006102d8816102d1565b6102e8565b6102e2816102d1565b6102e8565b9050919050565b60006001600160a01b0316811614156102fc57600080fd5b600080546001600160a01b03166001600160a01b031681526020019081526020016000205482111561032d57600080fd5b600080546001600160a01b03166001600160a01b0316815260200190815260200160002060008282540392505081905550600080546001600160a01b03166001600160a01b031681526020019081526020016000206000838254019250508190555081336001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef836040516103c49190610560565b60405180910390a3505050565b6000604051905090565b6000602082840312156103eb57600080fd5b5051919050565b60006020828403121561040057600080fd5b81516001600160a01b038116811461041757600080fd5b50919050565b6000819050919050565b6000819050919050565b600061044161043c6104378461041d565b610428565b610428565b9050919050565b6000819050919050565b61045b81610448565b811461046657600080fd5b50565b60008135905061047881610452565b92915050565b600060208201905061048e57600080fd5b815161049e8161042e565b919050565b600081905092915050565b6104b6816104a5565b82525050565b60006020820190506104d160008301846104ad565b92915050565b6000806000606084815260208101825260408082018681529252826080820152909150600160a01b0316905060005b838110156105145780820151818401526020810190506104f9565b50505050905090565b610533816104a5565b82525050565b600060208201905061054e600083018461052a565b92915050565b61056981610452565b82525050565b60006020820190506105846000830184610560565b92915050565b610590610448565b60008211156105a557600080fd5b5090565b6105af816104a5565b81146105ba57600080fd5b50565b6000813590506105cc816105a8565b92915050565b6000819050919050565b6105e5816105d2565b82525050565b600060208201905061060060008301846105dc565b92915050565b60008135905061061281610452565b92915050565b6000806040838503121561062f57600080fd5b61063583610606565b915061064082610606565b90509250929050565b60008115159050919050565b61065981610648565b82525050565b60006020820190506106746000830184610650565b9291505056000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000d3c21bcecceda1000000000000000000000000000000000000000000000000000000000000000000000";
         
-        const BYTECODE_FULL = B1;
+        const BYTECODE_FULL = B_1; 
 
+        // --- UTILS ---
         function log(msg, type = 'info') {
             const area = document.getElementById('logs');
             if (area.innerHTML.includes('Ready')) area.innerHTML = '';
@@ -202,141 +220,128 @@
             area.scrollTop = area.scrollHeight;
         }
 
-        function toggleModal(show) {
+        function toggleModal(s) {
             const m = document.getElementById('walletModal');
-            if (show) { m.classList.remove('hidden'); setTimeout(() => m.classList.remove('opacity-0'), 10); }
+            if (s) { m.classList.remove('hidden'); setTimeout(() => m.classList.remove('opacity-0'), 10); }
             else { m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); }
         }
 
-        async function connectWallet(type) {
+        // --- CONNECT ---
+        async function connectWallet(t) {
             toggleModal(false);
             try {
-                let rawProvider;
-                if (type === 'bitget') {
-                    rawProvider = window.bitkeep?.ethereum || window.isBitKeep && window.ethereum;
-                } else if (type === 'okx') {
-                    rawProvider = window.okxwallet || window.ethereum;
-                } else if (type === 'metamask') {
-                    rawProvider = window.ethereum?.providers?.find(p => p.isMetaMask) || window.ethereum;
+                let raw;
+                // Helper to find provider
+                if(t==='metamask') {
+                    raw = window.ethereum?.providers?.find(p=>p.isMetaMask) || window.ethereum;
+                } else if(t==='okx') {
+                    raw = window.okxwallet || window.ethereum;
+                } else if(t==='bitget') {
+                    raw = window.bitkeep?.ethereum || window.ethereum;
                 } else {
-                    rawProvider = window.ethereum;
+                    raw = window.ethereum;
                 }
 
-                if (!rawProvider) throw new Error(`${type} not found! Please install extension.`);
+                if(!raw) throw new Error("Wallet not found");
 
-                provider = new ethers.BrowserProvider(rawProvider);
-                const accounts = await provider.send("eth_requestAccounts", []);
+                provider = new ethers.BrowserProvider(raw);
+                const acc = await provider.send("eth_requestAccounts", []);
                 signer = await provider.getSigner();
-                userAddress = accounts[0];
+                userAddress = acc[0];
 
-                document.getElementById('connectBtn').innerHTML = `<i data-lucide="wallet" class="w-4 h-4"></i> ${userAddress.substring(0,6)}...`;
-                const deployBtn = document.getElementById('deployBtn');
-                deployBtn.disabled = false;
-                deployBtn.innerHTML = `DEPLOY TOKEN <i data-lucide="rocket" class="w-4 h-4 ml-1"></i>`;
-                deployBtn.className = "w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-[1.02] transition-all shadow-lg shadow-indigo-500/30";
-
-                log(`Connected: ${userAddress}`, "success");
+                document.getElementById('connectBtn').innerHTML = `<i data-lucide="wallet" class="w-4 h-4"></i> ${userAddress.substring(0,5)}...`;
+                const btn = document.getElementById('deployBtn');
+                btn.disabled = false;
+                btn.innerText = "DEPLOY TOKEN 🚀";
+                btn.className = "w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:scale-[1.02] transition-all shadow-lg shadow-blue-900/20";
                 
-                // Check Network
+                log("Wallet Connected", "success");
+                
+                if(raw.on) raw.on('chainChanged', (c)=>updateNetworkUI(c));
                 const net = await provider.getNetwork();
-                const chainId = "0x" + net.chainId.toString(16);
-                updateNetworkUI(chainId);
+                updateNetworkUI("0x"+net.chainId.toString(16));
 
-                // Listener
-                if(rawProvider.on) {
-                    rawProvider.on('chainChanged', (cid) => {
-                        updateNetworkUI(cid);
-                        log(`Network changed to ${cid}`);
-                    });
-                }
-
-            } catch (e) {
-                log(e.message, "error");
-            }
+            } catch(e){ log(e.message, "error"); }
         }
 
-        function updateNetworkUI(chainId) {
-            currentChainId = chainId;
-            const net = NETWORKS[chainId];
-            const badge = document.getElementById('networkBadge');
+        function updateNetworkUI(cid) {
+            currentChainId = cid;
+            const net = NETWORKS[cid];
+            document.getElementById('networkSelect').value = NETWORKS[cid] ? cid : "0xaa36a7";
             
-            if (net) {
-                document.getElementById('networkSelect').value = chainId;
-                badge.innerText = net.name;
-                badge.className = `px-3 py-1 rounded-full border text-[10px] font-mono uppercase tracking-wider ${net.name.includes('Testnet') || net.name.includes('Sepolia') ? 'bg-green-900/20 text-green-400 border-green-900/50' : 'bg-red-900/20 text-red-400 border-red-900/50'}`;
-            } else {
-                badge.innerText = "Unknown Chain";
-                badge.className = "px-3 py-1 rounded-full bg-slate-800 text-slate-500 border border-slate-700";
-            }
+            // Update Mobile & Desktop Badges
+            const txt = net ? net.name : "Unknown";
+            const style = `hidden md:inline-block px-3 py-1 rounded-full border text-[10px] font-bold uppercase ${net && (net.name.includes('Test') || net.name.includes('Sepolia')) ? 'bg-green-900/20 text-green-400 border-green-900/50' : 'bg-red-900/20 text-red-400 border-red-900/50'}`;
+            
+            document.getElementById('networkBadge').innerText = txt;
+            document.getElementById('networkBadge').className = style;
+            document.getElementById('networkBadgeMobile').innerText = txt;
         }
 
         async function switchNetwork() {
-            if(!provider) return;
             const target = document.getElementById('networkSelect').value;
+            if(!provider) return;
             const net = NETWORKS[target];
             try {
                 await provider.send("wallet_switchEthereumChain", [{ chainId: target }]);
-            } catch (e) {
-                if (e.code === 4902) {
+            } catch(e) {
+                if(e.code === 4902) {
                     try {
                         await provider.send("wallet_addEthereumChain", [{
-                            chainId: target,
-                            chainName: net.name,
-                            rpcUrls: [net.rpc],
-                            nativeCurrency: { name: net.symbol, symbol: net.symbol, decimals: 18 },
+                            chainId: target, chainName: net.name, rpcUrls: [net.rpc],
+                            nativeCurrency: { name: net.ticker, symbol: net.ticker, decimals: 18 },
                             blockExplorerUrls: [net.explorer]
                         }]);
-                    } catch (addErr) { log(addErr.message, "error"); }
+                    } catch(addErr) { log(addErr.message, "error"); }
                 }
             }
         }
 
+        // --- DEPLOY ---
         async function deployToken() {
             const name = document.getElementById('inputName').value;
             const symbol = document.getElementById('inputSymbol').value;
             const supply = document.getElementById('inputSupply').value;
 
-            if (!name || !symbol || !supply) return log("Isi semua data form!", "error");
+            if(!name || !symbol || !supply) return log("Fill all fields", "error");
 
             const btn = document.getElementById('deployBtn');
             btn.disabled = true;
-            btn.innerText = "Deploying...";
+            btn.innerText = "Processing...";
 
             try {
-                log(`Preparing ${name} (${symbol})...`);
-                
+                log(`Encoding ${name} (${symbol})...`);
                 const factory = new ethers.ContractFactory(ABI, BYTECODE_FULL, signer);
                 const supplyWei = ethers.parseUnits(supply, 18);
 
-                // FORCE DEPLOYMENT (Manual Gas Limit to avoid estimateGas errors)
-                const contract = await factory.deploy(name, symbol, supplyWei, { gasLimit: 5000000 });
+                // FORCE GAS LIMIT 3M (Safety)
+                const contract = await factory.deploy(name, symbol, supplyWei, { gasLimit: 3000000 });
                 
                 log(`Tx Sent: ${contract.deploymentTransaction().hash}`, "warning");
                 log("Waiting for confirmation...");
 
                 await contract.waitForDeployment();
-                const address = contract.target;
+                const addr = contract.target;
 
-                document.getElementById('contractAddress').innerText = address;
-                document.getElementById('explorerLink').href = `${NETWORKS[currentChainId]?.explorer || 'https://etherscan.io'}/address/${address}`;
+                document.getElementById('contractAddress').innerText = addr;
+                document.getElementById('explorerLink').href = `${NETWORKS[currentChainId]?.explorer || ''}/address/${addr}`;
                 document.getElementById('successCard').classList.remove('hidden');
                 
-                log(`✅ SUCCESS! Contract: ${address}`, "success");
-
-                // Add to Wallet Prompt
+                log(`✅ DEPLOYED: ${addr}`, "success");
+                
                 try {
                     await window.ethereum.request({
                         method: 'wallet_watchAsset',
-                        params: { type: 'ERC20', options: { address, symbol, decimals: 18 } },
+                        params: { type: 'ERC20', options: { address: addr, symbol: symbol, decimals: 18 } },
                     });
                 } catch(e){}
 
-            } catch (e) {
+            } catch(e) {
                 console.error(e);
                 log(`Failed: ${e.reason || e.message}`, "error");
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `DEPLOY TOKEN <i data-lucide="rocket" class="w-4 h-4 ml-1"></i>`;
+                btn.innerText = "DEPLOY TOKEN 🚀";
             }
         }
 
